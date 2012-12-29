@@ -90,6 +90,21 @@ class TagmDB( object ):
             subtags += self._get_subtag_ids( tag['rowid'] )
         
         return subtags
+
+    def _get_tagpath( self, tag_id ):
+        '''Gets the tagpath for the specifed tag_id'''
+        row = self.db.execute( 'select parent, tag from tags where rowid = ?', [tag_id] ).fetchone()
+        
+        tagnames = []
+        
+        if not row:
+            raise TagNotFoundError
+
+        if row['parent']:
+            tagnames += self._get_tagpath( row['parent'] )
+        tagnames.append( row['tag'] )
+        
+        return tagnames
     
     # Public methods
     def add( self, tagpaths, objs = None, find = None ):
