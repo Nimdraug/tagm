@@ -34,13 +34,13 @@ def test_get_tags_by_tags():
     test_add_tags()
     
     res = db.get_tags( ['a', 'b' ] )
-    assert res == [ 'c', 'd', 'e' ]
+    assert res == [ 'c', 'd', 'e', 'f', 'g' ]
     
     res = db.get_tags( ['a', 'b', 'd' ] )
-    assert res == [ 'e' ]
+    assert res == [ 'c', 'e' ]
 
     res = db.get_tags( ['a', 'b', 'f' ] )
-    assert res == [ 'g' ]
+    assert res == [ 'c', 'g' ]
 
     res = db.get_tags( ['a', 'b', 'e', 'f' ] )
     assert res == []
@@ -58,7 +58,7 @@ def test_get_tags_by_objs():
     assert res == [ 'a', 'b', 'c' ]
 
 def run_test( test_func ):
-    print 'Running %s... ' % test_func.__name__,
+    print 'Running %s...' % test_func.__name__,
     
     test_func()
     
