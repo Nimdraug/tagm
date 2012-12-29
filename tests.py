@@ -11,21 +11,21 @@ def init_dummy_db():
 def test_add_tags():
     init_dummy_db()
     
-    db.add( [ 'a', 'b', 'c' ], [ 'obj1', 'obj2' ] )
-    db.add( [ 'd', 'e' ], [ 'obj1' ] )
-    db.add( [ 'f', 'g' ], [ 'obj2' ] )
+    db.add( [ 'a', 'b', 'c' ], [ 'test_data/obj1', 'test_data/obj2' ] )
+    db.add( [ 'd', 'e' ], [ 'test_data/obj1' ] )
+    db.add( [ 'f', 'g' ], [ 'test_data/obj2' ] )
 
 def test_get_objs_by_tags():
     test_add_tags()
     
     res = db.get( [ 'a', 'b' ] )
-    assert res == [ 'obj1', 'obj2' ]
+    assert res == [ 'test_data/obj1', 'test_data/obj2' ]
     
     res = db.get( [ 'a', 'd' ] )
-    assert res == [ 'obj1' ]
+    assert res == [ 'test_data/obj1' ]
 
     res = db.get( [ 'a', 'f' ] )
-    assert res == [ 'obj2' ]
+    assert res == [ 'test_data/obj2' ]
 
     res = db.get( [ 'd', 'f' ] )
     assert res == []
@@ -48,13 +48,13 @@ def test_get_tags_by_tags():
 def test_get_tags_by_objs():
     test_add_tags()
     
-    res = db.get_tags( objs = [ 'obj1' ] )
+    res = db.get_tags( objs = [ 'test_data/obj1' ] )
     assert res == [ 'a', 'b', 'c', 'd', 'e' ]
 
-    res = db.get_tags( objs = [ 'obj2' ] )
+    res = db.get_tags( objs = [ 'test_data/obj2' ] )
     assert res == [ 'a', 'b', 'c', 'f', 'g' ]
 
-    res = db.get_tags( objs = [ 'obj1', 'obj2' ] )
+    res = db.get_tags( objs = [ 'test_data/obj1', 'test_data/obj2' ] )
     assert res == [ 'a', 'b', 'c' ]
 
 def run_test( test_func ):
