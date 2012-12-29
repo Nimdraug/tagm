@@ -157,8 +157,7 @@ class TagmDB( object ):
         
         query += ' left join objs as o on ( t0.obj_id = o.rowid ) where ' + ' and '.join( where )
 
-        curs = self.db.execute( query, query_tags )
-        return curs
+        return [ obj['path'] for obj in self.db.execute( query, query_tags ) ]
         
     
     def get_tags( self, tagpaths ):
