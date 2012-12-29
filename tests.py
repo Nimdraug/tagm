@@ -57,14 +57,21 @@ def test_get_tags_by_objs():
     res = db.get_tags( objs = [ 'obj1', 'obj2' ] )
     assert res == [ 'a', 'b', 'c' ]
 
+def run_test( test_func ):
+    print 'Running %s... ' % test_func.__name__,
+    
+    test_func()
+    
+    print 'Passed!'
+
 def run_all_tests():
-    test_add_tags()
+    run_test( test_add_tags )
     
-    test_get_objs_by_tags()
+    run_test( test_get_objs_by_tags )
     
-    test_get_tags_by_tags()
+    run_test( test_get_tags_by_tags )
     
-    test_get_tags_by_objs()
+    run_test( test_get_tags_by_objs )
 
 if __name__ == '__main__':
     run_all_tests()
