@@ -55,9 +55,9 @@ class TagmDB( object ):
 
     # Private util methods
     def _parse_tagpaths( self, tagpaths ):
-        '''Cleans up tagpaths and returns them as a list instead of a comma sep string'''
+        '''Cleans up tagpaths and returns them as a lists instead of a colon sep string'''
         
-        return [ [ tag.strip() for tag in tagpath.split( ':' ) ] for tagpath in tagpaths.split( ',' ) ]
+        return [ [ tag.strip() for tag in tagpath.split( ':' ) ] for tagpath in tagpaths ]
 
     def _get_tag_ids( self, parsed_tagpaths, create = False ):
         '''Takes a list of tagpaths and returns the tag id of the leaf nodes'''
