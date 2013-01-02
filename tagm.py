@@ -6,6 +6,7 @@ import sqlite3
 # tagpath       ie. Earth:Europe:Sweden
 # tagpaths      ie. Earth:Europe:Sweden,Building:Residentual
 # subtag        ie. in Earth:Europe, Europe is a subtag of Earth
+# leaftag       ie. in Earth:Europe:Sweden, Sweden is the leaftag
 # obj           ie. /home/user/documents/a.txt
 #               or  http://www.example.com/url/file.txt
 # objs          ie. [ obj, ... ]
@@ -140,6 +141,65 @@ class TagmDB( object ):
                 self.db.execute( 'insert into objtags ( tag_id, obj_id ) values ( ?, ? )', ( tag_id, obj_id ) )
         
         self.db.commit()
+
+    def _new_get( self, tagpaths, obj_tags = False, subtags = False ):
+        '''
+            Looks up the objects tagged by the leaftags (or the leaftags' subtags if subtags is True)
+            and returns the objects themselves, or their common tags (not among the leaftags) depending
+            on whether obj_tags is True or not.
+        '''
+        try:
+            # Split tagpaths up into individual tags
+            tags = self._parse_tagpaths( tagpaths )
+            
+            # Lookup the leaftag ids
+            tagids = self._get_tag_ids( tags )
+
+            # If required, recursively include all of the subtags of the leaftags
+            # TODO: subtags as recursion depth _get_subtag_ids( tid, subtags )
+            if subtags:
+                tagids = [ [ tid ] + self._get_subtag_ids( tid ) for tid in tagids ]
+        except TagNotFoundError:
+            # One of the tags provided does not exist, thus no query is needed as nothing will be found.
+            return []
+        
+        # Start constructing the query
+        where = []
+        query_tags = []
+        query = ''
+        
+        for i, tag in enumerate( tags ):
+            if i > 0:
+                query += " left join objtags as t%s on ( t0.obj_id = t%s.obj_id  )" % ( i, i )
+
+            if len( tag ) > 1:
+                # subtags is True, obj can have any of the listed tags
+                where.append( 't%s.tag_id in (%s)' % ( i, ','.join( [ str( t ) for t in tag ] ) ) )
+            else:
+                query_tags.append( tag[0] )
+                where.append( 't%s.tag_id = ?' % ( i ) )
+
+        # TODO: Rearrange?
+        if not obj_tags:
+            query = "select distinct o.path from objtags as t0" + query
+            query += ' left join objtags as tt on ( tt.obj_id = t0.obj_id and tt.tag_id not in ( %s ) )' % ','.join( [ str( tag ) for tag in tags ] )
+            where.append( 'tt.tag_id not null' )
+        else:
+            query = "select tt.tag_id from objtags as t0" + query
+            query += ' left join objs as o on ( t0.obj_id = o.rowid )'
+        
+        query += ' where ' + ' and '.join( where )
+        
+        if obj_tags:
+            query += ' union select rowid from tags where parent in ( %s )' % ( ','.join( [ str( tag ) for tag in tags ] ) )
+
+        curs = self.db.execute( query, query_tags )
+
+        if not obj_tags:
+            return [ row['path'] for obj in curs ]
+        else:
+            return [ ':'.join( self._get_tagpath( row[0] ) ) for row in curs ]
+            
 
     def get( self, tagpaths ):
         '''
