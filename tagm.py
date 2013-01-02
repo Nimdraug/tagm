@@ -23,18 +23,19 @@ class TagmDB( object ):
             # if nothing found, error will be raised.
             curpath = os.path.realpath( '.' )
             while 1:
-                if os.path.exists( os.path.join( curpath, '.tagr.db' ) ):
+                if os.path.exists( os.path.join( curpath, '.tagm.db' ) ):
                     self.dbpath = curpath
                     break
                 elif curpath == '/':
-                    raise DBNotFoundError, 'Could not find tagr database'
+                    raise DBNotFoundError, 'Could not find tagm database'
                 else:
                     curpath = os.path.realpath( curpath + '/..' )
+            self.db = sqlite3.connect( os.path.join( self.dbpath, '.tagm.db' ) )
         else:
             self.dbpath = os.path.split( dbfile )[0]
+            self.db = sqlite3.connect( dbfile )
 
        
-        self.db = sqlite3.connect( os.path.join( self.dbpath, '.tagr.db' ) )
         self.db.row_factory = sqlite3.Row
         try:
             self.db.execute( 'select * from tags' )
