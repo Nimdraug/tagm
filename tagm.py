@@ -201,14 +201,16 @@ class TagmDB( object ):
         curs = self.db.execute( query, tags )
         return [ ':'.join( self._get_tagpath( row[0] ) ) for row in curs ]
 
-    def get_obj_tags( self, obj ):
-        query = 'select tag_id from objtags where obj_id = ( select rowid from objs where path = ? )'
+    def get_obj_tags( self, objs ):
+        query = 'select distinct tag_id from objtags where obj_id in ( select rowid from objs where path in ( %s ) )'
 
-        obj = os.path.relpath( obj, self.dbpath )
+        objs = [ os.path.relpath( obj, self.dbpath ) for obj in objs ]
+        
+        query = query % ( "'" + "','".join( objs ) + "'" )
         
         objtags = []
         
-        for row in self.db.execute( query, [obj] ):
+        for row in self.db.execute( query ):
             objtags.append( ':'.join( self._get_tagpath( row['tag_id'] ) ) )
         
         return objtags

@@ -48,13 +48,13 @@ def test_get_tags_by_tags():
 def test_get_tags_by_objs():
     test_add_tags()
     
-    res = db.get_tags( objs = [ 'test_data/obj1' ] )
+    res = db.get_obj_tags( [ 'test_data/obj1' ] )
     assert res == [ 'a', 'b', 'c', 'd', 'e' ]
 
-    res = db.get_tags( objs = [ 'test_data/obj2' ] )
+    res = db.get_obj_tags( [ 'test_data/obj2' ] )
     assert res == [ 'a', 'b', 'c', 'f', 'g' ]
 
-    res = db.get_tags( objs = [ 'test_data/obj1', 'test_data/obj2' ] )
+    res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
     assert res == [ 'a', 'b', 'c' ]
 
 def run_test( test_func ):
