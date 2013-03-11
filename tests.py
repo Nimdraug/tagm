@@ -14,6 +14,10 @@ def test_add_tags():
     db.add( [ 'a', 'b', 'c' ], [ 'test_data/obj1', 'test_data/obj2' ] )
     db.add( [ 'd', 'e' ], [ 'test_data/obj1' ] )
     db.add( [ 'f', 'g' ], [ 'test_data/obj2' ] )
+    
+    # TODO: Test for add with find instead of objects, ie:
+    # db.add( ['h'], find = [ 'a', 'c' ] )
+    # should tag both obj 1 and 2 with h
 
 def test_get_objs_by_tags():
     test_add_tags()
@@ -28,6 +32,12 @@ def test_get_objs_by_tags():
     assert res == [ 'test_data/obj2' ]
 
     res = db.get( [ 'd', 'f' ] )
+    assert res == []
+    
+    # TODO: Should this raise an exception? Ie TagNotFoundError
+    #       Requires TagmDB.get to not handle TagNotFoundError
+    #       Question is, is that desired behavior?
+    res = db.get( [ 'h' ] )
     assert res == []
     
 def test_get_tags_by_tags():
@@ -55,6 +65,7 @@ def test_get_tags_by_objs():
     assert res == [ 'a', 'b', 'c', 'f', 'g' ]
 
     res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
+    print res
     assert res == [ 'a', 'b', 'c' ]
 
 def run_test( test_func ):
