@@ -43,16 +43,16 @@ def test_get_objs_by_tags():
 def test_get_tags_by_tags():
     test_add_tags()
     
-    res = db.get_tags( ['a', 'b' ] )
+    res = db.get( ['a', 'b' ], True )
     assert res == [ 'c', 'd', 'e', 'f', 'g' ]
     
-    res = db.get_tags( ['a', 'b', 'd' ] )
+    res = db.get( ['a', 'b', 'd' ], True )
     assert res == [ 'c', 'e' ]
 
-    res = db.get_tags( ['a', 'b', 'f' ] )
+    res = db.get( ['a', 'b', 'f' ], True )
     assert res == [ 'c', 'g' ]
 
-    res = db.get_tags( ['a', 'b', 'e', 'f' ] )
+    res = db.get( ['a', 'b', 'e', 'f' ], True )
     assert res == []
 
 def test_get_tags_by_objs():
