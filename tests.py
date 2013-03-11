@@ -18,31 +18,31 @@ def test_add_tags():
 def test_get_objs_by_tags():
     test_add_tags()
     
-    res = db._new_get( [ 'a', 'b' ] )
+    res = db.get( [ 'a', 'b' ] )
     assert res == [ 'test_data/obj1', 'test_data/obj2' ]
     
-    res = db._new_get( [ 'a', 'd' ] )
+    res = db.get( [ 'a', 'd' ] )
     assert res == [ 'test_data/obj1' ]
 
-    res = db._new_get( [ 'a', 'f' ] )
+    res = db.get( [ 'a', 'f' ] )
     assert res == [ 'test_data/obj2' ]
 
-    res = db._new_get( [ 'd', 'f' ] )
+    res = db.get( [ 'd', 'f' ] )
     assert res == []
     
 def test_get_tags_by_tags():
     test_add_tags()
     
-    res = db._new_get( ['a', 'b' ], True )
+    res = db.get( ['a', 'b' ], True )
     assert res == [ 'c', 'd', 'e', 'f', 'g' ]
     
-    res = db._new_get( ['a', 'b', 'd' ], True )
+    res = db.get( ['a', 'b', 'd' ], True )
     assert res == [ 'c', 'e' ]
 
-    res = db._new_get( ['a', 'b', 'f' ], True )
+    res = db.get( ['a', 'b', 'f' ], True )
     assert res == [ 'c', 'g' ]
 
-    res = db._new_get( ['a', 'b', 'e', 'f' ], True )
+    res = db.get( ['a', 'b', 'e', 'f' ], True )
     assert res == []
 
 def test_get_tags_by_objs():
