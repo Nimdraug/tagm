@@ -145,8 +145,16 @@ class TagmDB( object ):
     def _new_get( self, tagpaths, obj_tags = False, subtags = False ):
         '''
             Looks up the objects tagged by the leaftags (or the leaftags' subtags if subtags is True)
-            and returns the objects themselves, or their common tags (not among the leaftags) depending
-            on whether obj_tags is True or not.
+            and returns the objects themselves, or if obj_tags is True, returns any further tags the
+            objects are tagged with that are not part of the queried tags.
+            
+            Example:
+            If you have objects 1, 2 and 3, and the tags a, b and c.
+            And object 1 is tagged with a, object 2 with a and b, and
+            object 3 with a, b and c. Then querying for tags a and b
+            will return objects 2 and 3, and if obj_tags is True, the tag
+            c will be returned instead, giving the caller a listing of
+            what tags are available to further constrain its queries.
         '''
         try:
             # Split tagpaths up into individual tags
@@ -176,27 +184,28 @@ class TagmDB( object ):
                 # subtags is True, obj can have any of the listed tags
                 where.append( 't%s.tag_id in (%s)' % ( i, ','.join( [ str( t ) for t in tag ] ) ) )
             else:
-                query_tags.append( tag[0] )
+                query_tags.append( tagids[i] )
                 where.append( 't%s.tag_id = ?' % ( i ) )
 
         # TODO: Rearrange?
         if not obj_tags:
             query = "select distinct o.path from objtags as t0" + query
-            query += ' left join objtags as tt on ( tt.obj_id = t0.obj_id and tt.tag_id not in ( %s ) )' % ','.join( [ str( tag ) for tag in tags ] )
-            where.append( 'tt.tag_id not null' )
+            query += ' left join objs as o on ( t0.obj_id = o.rowid )'
         else:
             query = "select tt.tag_id from objtags as t0" + query
-            query += ' left join objs as o on ( t0.obj_id = o.rowid )'
+            query += ' left join objtags as tt on ( tt.obj_id = t0.obj_id and tt.tag_id not in ( %s ) )' % ','.join( [ str( tag ) for tag in tagids ] )
+            where.append( 'tt.tag_id not null' )
         
         query += ' where ' + ' and '.join( where )
         
         if obj_tags:
-            query += ' union select rowid from tags where parent in ( %s )' % ( ','.join( [ str( tag ) for tag in tags ] ) )
+            # TODO: Optional?
+            query += ' union select rowid from tags where parent in ( %s )' % ( ','.join( [ str( tag ) for tag in tagids ] ) )
 
         curs = self.db.execute( query, query_tags )
 
         if not obj_tags:
-            return [ row['path'] for obj in curs ]
+            return [ obj['path'] for obj in curs ]
         else:
             return [ ':'.join( self._get_tagpath( row[0] ) ) for row in curs ]
             
