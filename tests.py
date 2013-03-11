@@ -71,7 +71,7 @@ def run_all_tests():
     
     run_test( test_get_tags_by_tags )
     
-    #run_test( test_get_tags_by_objs )
+    run_test( test_get_tags_by_objs )
 
 if __name__ == '__main__':
     run_all_tests()
