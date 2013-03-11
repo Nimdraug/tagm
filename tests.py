@@ -65,8 +65,14 @@ def test_get_tags_by_objs():
     assert res == [ 'a', 'b', 'c', 'f', 'g' ]
 
     res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
-    print res
     assert res == [ 'a', 'b', 'c' ]
+    
+    # TODO: Test for non existing objs
+    #       Ie:
+    # res = db.get_obj_tags( [ 'test_data/obj3' ] )
+    # assert res == []
+    # -- or --
+    # check that ObjNotFoundError got raised
 
 def run_test( test_func ):
     print 'Running %s...' % test_func.__name__,

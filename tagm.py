@@ -107,6 +107,14 @@ class TagmDB( object ):
         
         return tagnames
     
+    def _get_obj_ids( self, objs ):
+        # TODO: Should raise exception on nonexisting objects like _get_tag_ids
+        #       Will currently cause tags to be returned for objects which dont have
+        #       any of the tags presented. Could cause unexpected behavior.
+        query = "select rowid from objs where path in ( '" + "','".join( objs ) + "' )"
+        
+        return [ row['rowid'] for row in self.db.execute( query ) ]
+    
     # Public methods
     def add( self, tagpaths, objs = None, find = None ):
         '''
@@ -202,15 +210,23 @@ class TagmDB( object ):
         return [ ':'.join( self._get_tagpath( row[0] ) ) for row in curs ]
 
     def get_obj_tags( self, objs ):
-        query = 'select distinct tag_id from objtags where obj_id in ( select rowid from objs where path in ( %s ) )'
+        query = "select distinct o0.tag_id from objtags as o0"
+        where = []
 
-        objs = [ os.path.relpath( obj, self.dbpath ) for obj in objs ]
+        objs = self._get_obj_ids( [ os.path.relpath( obj, self.dbpath ) for obj in objs ] )
         
-        query = query % ( "'" + "','".join( objs ) + "'" )
+        for i, obj in enumerate( objs ):
+            if i > 0:
+                query += " left join objtags as o%s on ( o0.tag_id = o%s.tag_id )" % ( i, i )
+            
+            where.append( 'o%s.obj_id = ?' % ( i ) )
+        
+        
+        query += ' where ' + ' and '.join( where )
         
         objtags = []
         
-        for row in self.db.execute( query ):
+        for row in self.db.execute( query, objs ):
             objtags.append( ':'.join( self._get_tagpath( row['tag_id'] ) ) )
         
         return objtags
