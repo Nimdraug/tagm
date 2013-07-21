@@ -1,11 +1,12 @@
 from subprocess import Popen, PIPE
+import os, shutil
 
 def test_init():
     #python2 tagm.py init'
     # Should result in a .tagm.db file being created
-    out, err = test_cmd( [ 'tagm.py', 'init' ] )
+    out, err = test_cmd( [ '../tagm.py', 'init' ] )
     
-    assert out == '''Initialized tagm database in .tagm.db'''
+    assert out == 'Initiated tagm database in .tagm.db\n'
     assert err == ''
 
 def test_cmd( cmd ):
@@ -20,7 +21,16 @@ def test_cmd( cmd ):
 def run_test( test_func ):
     print 'Running %s...' % test_func.__name__,
     
-    test_func()
+    # create test-data folder
+    os.mkdir( 'test-data' )
+    os.chdir( 'test-data' )
+    
+    try:
+        test_func()
+    finally:
+        # remove test-data folder along with any files in it.
+        os.chdir( '..' )
+        shutil.rmtree( 'test-data' )
     
     print 'Passed!'
 
