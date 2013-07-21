@@ -260,10 +260,20 @@ if __name__ == '__main__':
         for f in ns.objs:
             print 'Added', f, 'with tags', ns.tags
 
-    get_parser = subparsers.add_parser( 'add', description = 'Will add the specified tags to the specified objects' )
+    add_parser = subparsers.add_parser( 'add', description = 'Will add the specified tags to the specified objects' )
+    add_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
+    add_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be tagged' )
+    add_parser.set_defaults( func = do_add )
+
+    # Get command: gets objects tagged with tags
+    def do_get( ns ):
+        objs = db.get( ns.tags )
+        for obj in objs:
+            print os.path.relpath( os.path.join( db.dbpath, obj ) )
+
+    get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
     get_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
-    get_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be taged' )
-    get_parser.set_defaults( func = do_add )
+    get_parser.set_defaults( func = do_get )
 
     args = parser.parse_args()
 
