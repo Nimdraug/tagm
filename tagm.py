@@ -1,4 +1,4 @@
-#!/bin/env python2
+#!/usr/bin/env python2
 import os.path
 import sqlite3
 
@@ -266,7 +266,7 @@ def setup_parser():
 
     # Get command: gets objects tagged with tags
     def do_get( db, ns ):
-        objs = db.get( ns.tags.split(','), obj_tags = ns.obj_tags )
+        objs = db.get( ns.tags.split(','), obj_tags = ns.obj_tags, subtags = ns.subtags )
         if not ns.obj_tags:
             for obj in objs:
                 print os.path.relpath( os.path.join( db.dbpath, obj ) )
@@ -277,6 +277,7 @@ def setup_parser():
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
     get_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
     get_parser.add_argument( '--tags', action = 'store_true', dest = 'obj_tags' )
+    get_parser.add_argument( '--subtags', action = 'store_true' )
     get_parser.set_defaults( func = do_get )
     
     return parser
