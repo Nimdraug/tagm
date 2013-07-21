@@ -42,9 +42,9 @@ def test_get_tags_by_tags():
     test_add_tags()
     
     out = test_cmd( [ 'get', '--tags', 'a,b' ] )
-    assert out == 'c\nd\ne:f\n'
+    assert out == 'c\nd\n'
     out = test_cmd( [ 'get', '--tags', 'e:f' ] )
-    assert out == 'a\n'
+    assert out == 'a\nd\n'
     
 
 def test_cmd( cmd, no_err = True ):
