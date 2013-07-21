@@ -1,5 +1,4 @@
-from subprocess import Popen, PIPE
-import os, shutil
+import os, shutil, tagm, sys, StringIO
 
 def test_init():
     #python2 tagm.py init'
@@ -26,6 +25,8 @@ def test_add_tags():
     assert out == 'Added obj3 with tags a,b,c\n'
     out = test_cmd( [ 'add', 'd', 'obj1', 'obj2', 'obj3' ] )
     assert out == 'Added obj1 with tags d\nAdded obj2 with tags d\nAdded obj3 with tags d\n'
+    out = test_cmd( [ 'add', 'e:f', 'obj1' ] )
+    assert out == 'Added obj1 with tags e:f\n'
 
 def test_get_objs_by_tags():
     # Ensure db and tagged objects are setup
@@ -33,15 +34,30 @@ def test_get_objs_by_tags():
     
     out = test_cmd( [ 'get', 'a,b' ] )
     assert out == 'obj2\nobj3\n'
+    out = test_cmd( [ 'get', 'a,e:f' ] )
+    assert out == 'obj1\n'
     
 
 def test_cmd( cmd, no_err = True ):
-    proc = Popen( [ '../tagm.py' ] + cmd, stdout = PIPE, stderr = PIPE )
+    # Highjack stdout and stderr for a bit
+    oldout, olderr = sys.stdout, sys.stderr
+
+    sys.stdout = StringIO.StringIO()
+    sys.stderr = StringIO.StringIO()
     
-    stdout, stderr = proc.communicate()
+    try:
+        args = tagm.setup_parser().parse_args( cmd )
+        
+        db = tagm.TagmDB() if cmd[0] != 'init' else None
+
+        args.func( db, args )
+    finally:
+        stdout = sys.stdout.getvalue()
+        stderr = sys.stderr.getvalue()
     
-    assert proc.returncode == 0
-    
+        # Restore stds before return
+        sys.stdout, sys.stderr = oldout, olderr
+
     if no_err:
         assert stderr == ''
         

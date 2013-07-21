@@ -240,14 +240,14 @@ class TagmDB( object ):
         
         return objtags
 
-if __name__ == '__main__':
+def setup_parser():
     import argparse, sys
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
     # Init command: Initializes new tagm db file
-    def do_init( ns ):
+    def do_init( db, ns ):
         db = TagmDB( '.tagm.db' )
         print 'Initiated tagm database in .tagm.db'
     
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     init_parser.set_defaults( func = do_init )
     
     # Add command: Adds tags to objects
-    def do_add( ns ):
+    def do_add( db, ns ):
         db.add( ns.tags, ns.objs )
         for f in ns.objs:
             print 'Added', f, 'with tags', ns.tags
@@ -266,7 +266,7 @@ if __name__ == '__main__':
     add_parser.set_defaults( func = do_add )
 
     # Get command: gets objects tagged with tags
-    def do_get( ns ):
+    def do_get( db, ns ):
         objs = db.get( ns.tags )
         for obj in objs:
             print os.path.relpath( os.path.join( db.dbpath, obj ) )
@@ -274,10 +274,13 @@ if __name__ == '__main__':
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
     get_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
     get_parser.set_defaults( func = do_get )
+    
+    return parser
 
-    args = parser.parse_args()
+if __name__ == '__main__':
+    args = setup_parser().parse_args()
 
-    if args.func != do_init:
+    if args.func.__name__ != 'do_init':
         try:
             db = TagmDB()
         except DBNotFoundError:
