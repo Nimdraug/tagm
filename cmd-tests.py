@@ -20,6 +20,7 @@ def test_add_tags():
     os.mknod( 'obj3' )
     
     out, err = test_cmd( [ 'add', 'a', 'obj1' ] )
+    print out, err
     assert out == 'Added obj1 with tags a\n'
     assert err == ''
     test_cmd( [ 'add', 'a,b', 'obj2' ] )
@@ -28,8 +29,8 @@ def test_add_tags():
     test_cmd( [ 'add', 'a,b,c', 'obj3' ] )
     assert out == 'Added obj3 with tags a,b,c\n'
     assert err == ''
-    test_cmd( [ 'add', 'd', 'obj1,obj2,obj3' ] )
-    assert out == 'Added obj1,obj2,obj2 with tags d\n'
+    test_cmd( [ 'add', 'd', 'obj1', 'obj2', 'obj3' ] )
+    assert out == 'Added obj1 with tags d\nAdded obj2 with tags d\nAdded obj3 with tags d\n'
     assert err == ''
 
 def test_cmd( cmd ):
