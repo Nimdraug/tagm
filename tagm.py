@@ -255,3 +255,22 @@ if __name__ == '__main__':
             print 'Please create one by running:'
             print '%s init' % sys.argv[0]
             sys.exit(1)
+
+    parser = argparse.ArgumentParser()
+    parser.set_defaults( db = db )
+    subparsers = parser.add_subparsers()
+
+    # Add command: Adds tags to objects
+    def do_add( ns ):
+        db.add( ns.tags, ns.objs )
+        for f in ns.objs:
+            print 'Added', f, 'with tags', ns.tags
+
+    get_parser = subparsers.add_parser( 'add', description = 'Will add the specified tags to the specified objects' )
+    get_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
+    get_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be taged' )
+    get_parser.set_defaults( func = do_add )
+
+    args = parser.parse_args( )
+    
+    args.func( args )
