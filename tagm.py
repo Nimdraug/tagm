@@ -175,6 +175,8 @@ class TagmDB( object ):
             # TODO: subtags as recursion depth _get_subtag_ids( tid, subtags )
             if subtags:
                 tagids = [ [ tid ] + self._get_subtag_ids( tid ) for tid in tagids ]
+            else:
+                tagids = [ [ tid ] for tid in tagids ]
         except TagNotFoundError:
             # One of the tags provided does not exist, thus no query is needed as nothing will be found.
             return []
@@ -184,15 +186,16 @@ class TagmDB( object ):
         query_tags = []
         query = ''
         
-        for i, tag in enumerate( tags ):
+        for i, tagid in enumerate( tagids ):
             if i > 0:
                 query += " left join objtags as t%s on ( t0.obj_id = t%s.obj_id  )" % ( i, i )
 
-            if len( tag ) > 1:
+            if len( tagid ) > 1:
                 # subtags is True, obj can have any of the listed tags
-                where.append( 't%s.tag_id in (%s)' % ( i, ','.join( [ str( t ) for t in tag ] ) ) )
+                query_tags += tagid
+                where.append( 't%s.tag_id in ( %s )' % ( i, ', '.join( [ '?' ] * len( tagid ) ) ) )
             else:
-                query_tags.append( tagids[i] )
+                query_tags.append( tagid[0] )
                 where.append( 't%s.tag_id = ?' % ( i ) )
 
         # TODO: Rearrange?
@@ -200,16 +203,12 @@ class TagmDB( object ):
             query = "select distinct o.path from objtags as t0" + query
             query += ' left join objs as o on ( t0.obj_id = o.rowid )'
         else:
-            query = "select tt.tag_id from objtags as t0" + query
-            query += ' left join objtags as tt on ( tt.obj_id = t0.obj_id and tt.tag_id not in ( %s ) )' % ','.join( [ str( tag ) for tag in tagids ] )
+            query = "select distinct tt.tag_id from objtags as t0" + query
+            query += ' left join objtags as tt on ( tt.obj_id = t0.obj_id and tt.tag_id not in ( %s ) )' % ','.join( [ str( tagid[0] ) for tagid in tagids ] )
             where.append( 'tt.tag_id not null' )
         
         query += ' where ' + ' and '.join( where )
         
-        if obj_tags:
-            # TODO: Optional?
-            query += ' union select rowid from tags where parent in ( %s )' % ( ','.join( [ str( tag ) for tag in tagids ] ) )
-
         curs = self.db.execute( query, query_tags )
 
         if not obj_tags:
