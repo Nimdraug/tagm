@@ -1,3 +1,4 @@
+#!/bin/env python2
 import os.path
 import sqlite3
 
@@ -19,6 +20,7 @@ class DBNotFoundError( Exception ):
 
 class TagmDB( object ):
     def __init__( self, dbfile = None ):
+        # TODO: move the db file searching code out to cmd part
         if dbfile == None:
             # Try and find a .tagr.db file in current dir, if not there continue going up the filetree
             # if nothing found, error will be raised.
@@ -237,3 +239,19 @@ class TagmDB( object ):
             objtags.append( ':'.join( self._get_tagpath( row['tag_id'] ) ) )
         
         return objtags
+
+if __name__ == '__main__':
+    import argparse, sys
+
+    if len( sys.argv ) > 1 and sys.argv[1] == 'init':
+        db = TagmDB( '.tagm.db' )
+        print 'Initiated tagm database in .tagm.db'
+        sys.exit(0)
+    else:
+        try:
+            db = TagmDB()
+        except DBNotFoundError:
+            print 'Unable to find tagm database!'
+            print 'Please create one by running:'
+            print '%s init' % sys.argv[0]
+            sys.exit(1)
