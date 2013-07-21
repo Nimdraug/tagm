@@ -60,7 +60,6 @@ class TagmDB( object ):
     # Private util methods
     def _parse_tagpaths( self, tagpaths ):
         '''Cleans up tagpaths and returns them as a lists instead of a colon sep string'''
-        
         return [ [ tag.strip() for tag in tagpath.split( ':' ) ] for tagpath in tagpaths ]
 
     def _get_tag_ids( self, parsed_tagpaths, create = False ):
@@ -256,7 +255,7 @@ def setup_parser():
     
     # Add command: Adds tags to objects
     def do_add( db, ns ):
-        db.add( ns.tags, ns.objs )
+        db.add( ns.tags.split(','), ns.objs )
         for f in ns.objs:
             print 'Added', f, 'with tags', ns.tags
 
@@ -267,7 +266,7 @@ def setup_parser():
 
     # Get command: gets objects tagged with tags
     def do_get( db, ns ):
-        objs = db.get( ns.tags )
+        objs = db.get( ns.tags.split(',') )
         for obj in objs:
             print os.path.relpath( os.path.join( db.dbpath, obj ) )
 
@@ -288,5 +287,7 @@ if __name__ == '__main__':
             print 'Please create one by running:'
             print '%s init' % sys.argv[0]
             sys.exit(1)
+    else:
+        db = None
     
-    args.func( args )
+    args.func( db, args )
