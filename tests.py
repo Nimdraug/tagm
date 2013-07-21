@@ -19,6 +19,8 @@ def test_add_tags():
     # db.add( ['h'], find = [ 'a', 'c' ] )
     # should tag both obj 1 and 2 with h
     
+    # TODO: Should it be passed as [ ['i','j'] ] instead..?
+    #       Thus leave the delimiter up to downstream?
     db.add( [ 'i:j' ], [ 'test_data/obj1' ] )
     db.add( [ 'i' ], [ 'test_data/obj2' ] )
 
@@ -37,7 +39,7 @@ def test_get_objs_by_tags():
     res = db.get( [ 'd', 'f' ] )
     assert res == []
     
-    res = db.get( [ 'a', 'i' ] )
+    res = db.get( [ 'a', 'i' ], subtags = True )
     assert res == [ 'test_data/obj1', 'test_data/obj2' ]
     
     res = db.get( [ 'a', 'i:j' ] )
@@ -53,31 +55,31 @@ def test_get_tags_by_tags():
     test_add_tags()
     
     res = db.get( ['a', 'b' ], True )
-    assert res == [ 'c', 'd', 'e', 'f', 'g' ]
+    assert res == [ 'c', 'd', 'e', 'i:j', 'f', 'g', 'i' ]
     
     res = db.get( ['a', 'b', 'd' ], True )
-    assert res == [ 'c', 'e' ]
+    assert res == [ 'c', 'e', 'i:j' ]
 
     res = db.get( ['a', 'b', 'f' ], True )
-    assert res == [ 'c', 'g' ]
+    assert res == [ 'c', 'g', 'i' ]
 
     res = db.get( ['a', 'b', 'e', 'f' ], True )
     assert res == []
     
     res = db.get( [ 'i' ], True )
-    assert res == [ 'a', 'b', 'c' ]
+    assert res == [ 'a', 'b', 'c', 'f', 'g' ]
 
     res = db.get( [ 'i' ], True, True )
-    assert res == [ 'a', 'b', 'c', 'i:j' ]
+    assert res == [ 'a', 'b', 'c', 'd', 'e', 'i:j', 'f', 'g' ]
 
 def test_get_tags_by_objs():
     test_add_tags()
     
     res = db.get_obj_tags( [ 'test_data/obj1' ] )
-    assert res == [ 'a', 'b', 'c', 'd', 'e' ]
+    assert res == [ 'a', 'b', 'c', 'd', 'e', 'i:j' ]
 
     res = db.get_obj_tags( [ 'test_data/obj2' ] )
-    assert res == [ 'a', 'b', 'c', 'f', 'g' ]
+    assert res == [ 'a', 'b', 'c', 'f', 'g', 'i' ]
 
     res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
     assert res == [ 'a', 'b', 'c' ]
