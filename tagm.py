@@ -243,23 +243,17 @@ class TagmDB( object ):
 if __name__ == '__main__':
     import argparse, sys
 
-    if len( sys.argv ) > 1 and sys.argv[1] == 'init':
-        db = TagmDB( '.tagm.db' )
-        print 'Initiated tagm database in .tagm.db'
-        sys.exit(0)
-    else:
-        try:
-            db = TagmDB()
-        except DBNotFoundError:
-            print 'Unable to find tagm database!'
-            print 'Please create one by running:'
-            print '%s init' % sys.argv[0]
-            sys.exit(1)
-
     parser = argparse.ArgumentParser()
-    parser.set_defaults( db = db )
     subparsers = parser.add_subparsers()
 
+    # Init command: Initializes new tagm db file
+    def do_init( ns ):
+        db = TagmDB( '.tagm.db' )
+        print 'Initiated tagm database in .tagm.db'
+    
+    init_parser = subparsers.add_parser( 'init', description = 'Will initialzie a tagm database in a file called .tagm.db located in the current directory' )
+    init_parser.set_defaults( func = do_init )
+    
     # Add command: Adds tags to objects
     def do_add( ns ):
         db.add( ns.tags, ns.objs )
@@ -271,6 +265,15 @@ if __name__ == '__main__':
     get_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be taged' )
     get_parser.set_defaults( func = do_add )
 
-    args = parser.parse_args( )
+    args = parser.parse_args()
+
+    if args.func != do_init:
+        try:
+            db = TagmDB()
+        except DBNotFoundError:
+            print 'Unable to find tagm database!'
+            print 'Please create one by running:'
+            print '%s init' % sys.argv[0]
+            sys.exit(1)
     
     args.func( args )
