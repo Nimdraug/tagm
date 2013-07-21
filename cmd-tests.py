@@ -8,6 +8,7 @@ def test_init():
     
     assert out == 'Initiated tagm database in .tagm.db\n'
     assert err == ''
+    assert os.stat( '.tagm.db' )
 
 def test_cmd( cmd ):
     proc = Popen( cmd, stdout = PIPE, stderr = PIPE )
