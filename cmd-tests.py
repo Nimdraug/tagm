@@ -38,6 +38,8 @@ def test_get_objs_by_tags():
     assert out == 'obj1\n'
     out = test_cmd( [ 'get', '--subtags', 'a,e' ] )
     assert out == 'obj1\n'
+    out = test_cmd( [ 'get' ] )
+    assert out == 'obj1\nobj2\nobj3\n'
 
 def test_get_tags_by_tags():
     # Ensure db and tagged objects are setup
@@ -49,6 +51,8 @@ def test_get_tags_by_tags():
     assert out == 'a\nd\n'
     out = test_cmd( [ 'get', '--tags', '--subtags', 'e' ] )
     assert out == 'a\nd\ne:f\n'
+    out = test_cmd( [ 'get', '--tags' ] )
+    assert out == 'a\nb\nc\nd\ne\ne:f\n'
 
 def test_get_tags_by_objs():
     test_add_tags()
