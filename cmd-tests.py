@@ -50,6 +50,14 @@ def test_get_tags_by_tags():
     out = test_cmd( [ 'get', '--tags', '--subtags', 'e' ] )
     assert out == 'a\nd\ne:f\n'
 
+def test_get_tags_by_objs():
+    test_add_tags()
+    
+    out = test_cmd( [ 'get', '--obj-tags', 'obj1' ] )
+    assert out == 'a\nd\ne:f\n'
+    out = test_cmd( [ 'get', '--obj-tags', 'obj2,obj3' ] )
+    assert out == 'a\nb\nd\n'
+
 def test_cmd( cmd, no_err = True ):
     # Highjack stdout and stderr for a bit
     oldout, olderr = sys.stdout, sys.stderr
@@ -102,7 +110,7 @@ def run_all_tests():
     
     run_test( test_get_tags_by_tags )
     
-    #run_test( test_get_tags_by_objs )
+    run_test( test_get_tags_by_objs )
 
 if __name__ == '__main__':
     run_all_tests()

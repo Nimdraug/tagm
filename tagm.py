@@ -266,18 +266,24 @@ def setup_parser():
 
     # Get command: gets objects tagged with tags
     def do_get( db, ns ):
-        objs = db.get( ns.tags.split(','), obj_tags = ns.obj_tags, subtags = ns.subtags )
         if not ns.obj_tags:
-            for obj in objs:
-                print os.path.relpath( os.path.join( db.dbpath, obj ) )
+            objs = db.get( ns.tags.split(','), obj_tags = ns.tag_tags, subtags = ns.subtags )
+            if ns.tag_tags:
+                for tag in sorted( objs ):
+                    print tag
+                return
         else:
-            for tag in sorted( objs ):
-                print tag
+            objs = db.get_obj_tags( ns.tags.split(',') )
+
+        for obj in objs:
+            print os.path.relpath( os.path.join( db.dbpath, obj ) )
+        
             
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
     get_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
-    get_parser.add_argument( '--tags', action = 'store_true', dest = 'obj_tags' )
+    get_parser.add_argument( '--tags', action = 'store_true', dest = 'tag_tags' )
     get_parser.add_argument( '--subtags', action = 'store_true' )
+    get_parser.add_argument( '--obj-tags', action = 'store_true' )
     get_parser.set_defaults( func = do_get )
     
     return parser
