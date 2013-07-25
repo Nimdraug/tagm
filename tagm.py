@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
-import os.path
-import sqlite3
+import os.path, sys, sqlite3
 
 # == Terms ==
 # tag           ie. Sweden
@@ -207,8 +206,9 @@ class TagmDB( object ):
             query = "select distinct tt.tag_id from objtags as t0" + query
             query += ' left join objtags as tt on ( tt.obj_id = t0.obj_id and tt.tag_id not in ( %s ) )' % ','.join( [ str( tagid[0] ) for tagid in tagids ] )
             where.append( 'tt.tag_id not null' )
-        
-        query += ' where ' + ' and '.join( where )
+
+        if where:
+            query += ' where ' + ' and '.join( where )
         
         curs = self.db.execute( query, query_tags )
 
@@ -266,21 +266,24 @@ def setup_parser():
 
     # Get command: gets objects tagged with tags
     def do_get( db, ns ):
+        tags = ns.tags != '' and ns.tags.split(',') or []
+        
         if not ns.obj_tags:
-            objs = db.get( ns.tags.split(','), obj_tags = ns.tag_tags, subtags = ns.subtags )
+            objs = db.get( tags, obj_tags = ns.tag_tags, subtags = ns.subtags )
             if ns.tag_tags:
                 for tag in sorted( objs ):
                     print tag
                 return
         else:
-            objs = db.get_obj_tags( ns.tags.split(',') )
+            objs = db.get_obj_tags( tags )
 
         for obj in objs:
             print os.path.relpath( os.path.join( db.dbpath, obj ) )
         
             
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
-    get_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
+    get_parser.add_argument( 'tags', nargs = '?', default = '',
+                        help = 'List of tagpaths separated by comma' )
     get_parser.add_argument( '--tags', action = 'store_true', dest = 'tag_tags' )
     get_parser.add_argument( '--subtags', action = 'store_true' )
     get_parser.add_argument( '--obj-tags', action = 'store_true' )
