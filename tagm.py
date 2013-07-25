@@ -57,10 +57,6 @@ class TagmDB( object ):
             self.db.commit()
 
     # Private util methods
-    def _parse_tagpaths( self, tagpaths ):
-        '''Cleans up tagpaths and returns them as a lists instead of a colon sep string'''
-        return [ [ tag.strip() for tag in tagpath.split( ':' ) ] for tagpath in tagpaths ]
-
     def _get_tag_ids( self, parsed_tagpaths, create = False ):
         '''Takes a list of tagpaths and returns the tag id of the leaf nodes'''
         
@@ -117,11 +113,10 @@ class TagmDB( object ):
         return [ row['rowid'] for row in self.db.execute( query ) ]
     
     # Public methods
-    def add( self, tagpaths, objs = None, find = None ):
+    def add( self, tags, objs = None, find = None ):
         '''
             Adds tags to the specified objects
         '''
-        tags = self._parse_tagpaths( tagpaths )
         tags = self._get_tag_ids( tags, True )
         
         # If no objs, find can be used to search internaly for objs
@@ -150,7 +145,7 @@ class TagmDB( object ):
         
         self.db.commit()
 
-    def get( self, tagpaths, obj_tags = False, subtags = False ):
+    def get( self, tags, obj_tags = False, subtags = False ):
         '''
             Looks up the objects tagged by the leaftags (or the leaftags' subtags if subtags is True)
             and returns the objects themselves, or if obj_tags is True, returns any further tags the
@@ -165,9 +160,6 @@ class TagmDB( object ):
             what tags are available to further constrain its queries.
         '''
         try:
-            # Split tagpaths up into individual tags
-            tags = self._parse_tagpaths( tagpaths )
-            
             # Lookup the leaftag ids
             tagids = self._get_tag_ids( tags )
 
@@ -215,12 +207,12 @@ class TagmDB( object ):
         if not obj_tags:
             return [ obj['path'] for obj in curs ]
         else:
-            return [ ':'.join( self._get_tagpath( row[0] ) ) for row in curs ]
+            return [ self._get_tagpath( row[0] ) for row in curs ]
             
     def get_obj_tags( self, objs ):
         query = "select distinct o0.tag_id from objtags as o0"
         where = []
-
+        
         objs = self._get_obj_ids( [ os.path.relpath( obj, self.dbpath ) for obj in objs ] )
         
         for i, obj in enumerate( objs ):
@@ -235,9 +227,18 @@ class TagmDB( object ):
         objtags = []
         
         for row in self.db.execute( query, objs ):
-            objtags.append( ':'.join( self._get_tagpath( row['tag_id'] ) ) )
+            objtags.append( self._get_tagpath( row['tag_id'] ) )
         
         return objtags
+
+
+TAGPATH_SEP = ':'
+
+def parse_tagpaths( tagpaths ):
+    return [ [ tag.strip() for tag in tagpath.split( TAGPATH_SEP ) ] for tagpath in tagpaths ]
+
+def join_tagpaths( tagpaths ):
+    return [ TAGPATH_SEP.join( tags ) for tags in tagpaths ]
 
 def setup_parser():
     import argparse, sys
@@ -255,7 +256,9 @@ def setup_parser():
     
     # Add command: Adds tags to objects
     def do_add( db, ns ):
-        db.add( ns.tags.split(','), ns.objs )
+        tags = parse_tagpaths( ns.tags != '' and ns.tags.split(',') or [] )
+
+        db.add( tags, ns.objs )
         for f in ns.objs:
             print 'Added', f, 'with tags', ns.tags
 
@@ -269,16 +272,17 @@ def setup_parser():
         tags = ns.tags != '' and ns.tags.split(',') or []
         
         if not ns.obj_tags:
+            tags = parse_tagpaths( tags )
             objs = db.get( tags, obj_tags = ns.tag_tags, subtags = ns.subtags )
-            if ns.tag_tags:
-                for tag in sorted( objs ):
-                    print tag
-                return
         else:
             objs = db.get_obj_tags( tags )
 
-        for obj in objs:
-            print os.path.relpath( os.path.join( db.dbpath, obj ) )
+        if ns.tag_tags or ns.obj_tags:
+            for tag in sorted( join_tagpaths( objs ) ):
+                print tag
+        else:
+            for obj in objs:
+                print os.path.relpath( os.path.join( db.dbpath, obj ) )
         
             
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )

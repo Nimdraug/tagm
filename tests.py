@@ -21,7 +21,7 @@ def test_add_tags():
     
     # TODO: Should it be passed as [ ['i','j'] ] instead..?
     #       Thus leave the delimiter up to downstream?
-    db.add( [ 'i:j' ], [ 'test_data/obj1' ] )
+    db.add( [ [ 'i', 'j' ] ], [ 'test_data/obj1' ] )
     db.add( [ 'i' ], [ 'test_data/obj2' ] )
 
 def test_get_objs_by_tags():
@@ -42,7 +42,7 @@ def test_get_objs_by_tags():
     res = db.get( [ 'a', 'i' ], subtags = True )
     assert res == [ 'test_data/obj1', 'test_data/obj2' ]
     
-    res = db.get( [ 'a', 'i:j' ] )
+    res = db.get( [ 'a', [ 'i', 'j' ] ] )
     assert res == [ 'test_data/obj1' ]
     
     res = db.get( [] )
@@ -57,38 +57,38 @@ def test_get_objs_by_tags():
 def test_get_tags_by_tags():
     test_add_tags()
     
-    res = db.get( ['a', 'b' ], True )
-    assert res == [ 'c', 'd', 'e', 'i:j', 'f', 'g', 'i' ]
+    res = db.get( [ 'a', 'b' ], True )
+    assert res == [ [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ], [ 'f' ], [ 'g' ], [ 'i' ] ]
     
     res = db.get( ['a', 'b', 'd' ], True )
-    assert res == [ 'c', 'e', 'i:j' ]
+    assert res == [ [ 'c' ], [ 'e' ], [ 'i', 'j' ] ]
 
     res = db.get( ['a', 'b', 'f' ], True )
-    assert res == [ 'c', 'g', 'i' ]
+    assert res == [ [ 'c' ], [ 'g' ], [ 'i' ] ]
 
     res = db.get( ['a', 'b', 'e', 'f' ], True )
     assert res == []
     
     res = db.get( [ 'i' ], True )
-    assert res == [ 'a', 'b', 'c', 'f', 'g' ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ] ]
 
     res = db.get( [ 'i' ], True, True )
-    assert res == [ 'a', 'b', 'c', 'd', 'e', 'i:j', 'f', 'g' ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ], [ 'f' ], [ 'g' ] ]
 
 def test_get_tags_by_objs():
     test_add_tags()
     
     res = db.get_obj_tags( [ 'test_data/obj1' ] )
-    assert res == [ 'a', 'b', 'c', 'd', 'e', 'i:j' ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ] ]
 
     res = db.get_obj_tags( [ 'test_data/obj2' ] )
-    assert res == [ 'a', 'b', 'c', 'f', 'g', 'i' ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ], [ 'i' ] ]
 
     res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
-    assert res == [ 'a', 'b', 'c' ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ] ]
     
     res = db.get_obj_tags( [] )
-    assert res == [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'i:j', 'i' ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'f' ], [ 'g' ], [ 'i', 'j' ], [ 'i' ] ]
 
     # TODO: Test for non existing objs
     #       Ie:
