@@ -229,8 +229,8 @@ class TagmDB( object ):
             
             where.append( 'o%s.obj_id = ?' % ( i ) )
         
-        
-        query += ' where ' + ' and '.join( where )
+        if where:
+            query += ' where ' + ' and '.join( where )
         
         objtags = []
         
