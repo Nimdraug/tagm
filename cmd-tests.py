@@ -61,6 +61,8 @@ def test_get_tags_by_objs():
     assert out == 'a\nd\ne:f\n'
     out = test_cmd( [ 'get', '--obj-tags', 'obj2,obj3' ] )
     assert out == 'a\nb\nd\n'
+    out = test_cmd( [ 'get', '--obj-tags' ] )
+    assert out == 'a\nb\nc\nd\ne:f\n'
 
 def test_cmd( cmd, no_err = True ):
     # Highjack stdout and stderr for a bit

@@ -45,6 +45,9 @@ def test_get_objs_by_tags():
     res = db.get( [ 'a', 'i:j' ] )
     assert res == [ 'test_data/obj1' ]
     
+    res = db.get( [] )
+    assert res == [ 'test_data/obj1', 'test_data/obj2' ]
+    
     # TODO: Should this raise an exception? Ie TagNotFoundError
     #       Requires TagmDB.get to not handle TagNotFoundError
     #       Question is, is that desired behavior?
@@ -84,6 +87,9 @@ def test_get_tags_by_objs():
     res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
     assert res == [ 'a', 'b', 'c' ]
     
+    res = db.get_obj_tags( [] )
+    assert res == [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'i:j', 'i' ]
+
     # TODO: Test for non existing objs
     #       Ie:
     # res = db.get_obj_tags( [ 'test_data/obj3' ] )
