@@ -74,9 +74,9 @@ def test_cmd( cmd, no_err = True ):
     try:
         args = tagm.setup_parser().parse_args( cmd )
         
-        db = tagm.TagmDB() if cmd[0] != 'init' else None
+        db = tagm.TagmDB( '.tagm.db' ) if cmd[0] != 'init' else None
 
-        args.func( db, args )
+        args.func( db, '', args )
     finally:
         stdout = sys.stdout.getvalue()
         stderr = sys.stderr.getvalue()

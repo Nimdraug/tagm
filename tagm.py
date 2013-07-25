@@ -19,25 +19,9 @@ class DBNotFoundError( Exception ):
 
 class TagmDB( object ):
     def __init__( self, dbfile = None ):
-        # TODO: move the db file searching code out to cmd part
-        if dbfile == None:
-            # Try and find a .tagr.db file in current dir, if not there continue going up the filetree
-            # if nothing found, error will be raised.
-            curpath = os.path.realpath( '.' )
-            while 1:
-                if os.path.exists( os.path.join( curpath, '.tagm.db' ) ):
-                    self.dbpath = curpath
-                    break
-                elif curpath == '/':
-                    raise DBNotFoundError, 'Could not find tagm database'
-                else:
-                    curpath = os.path.realpath( curpath + '/..' )
-            self.db = sqlite3.connect( os.path.join( self.dbpath, '.tagm.db' ) )
-        else:
-            self.dbpath = os.path.split( dbfile )[0]
-            self.db = sqlite3.connect( dbfile )
+        self.dbpath = os.path.split( dbfile )[0]
+        self.db = sqlite3.connect( dbfile )
 
-       
         self.db.row_factory = sqlite3.Row
         try:
             self.db.execute( 'select * from tags' )
@@ -234,14 +218,14 @@ def parse_tagpaths( tagpaths ):
 def join_tagpaths( tagpaths ):
     return [ TAGPATH_SEP.join( tags ) for tags in tagpaths ]
 
-def process_paths( db, paths ):
+def process_paths( dbpath, paths ):
     # Ensure that paths exist and are relative to db path
     for path in paths:
         if not os.path.exists( path ):
             raise Exception, '%s not found' % path
 
         # Add object
-        yield os.path.relpath( path, db.dbpath )
+        yield os.path.relpath( path, dbpath )
 
 def setup_parser():
     import argparse, sys
@@ -250,7 +234,7 @@ def setup_parser():
     subparsers = parser.add_subparsers()
 
     # Init command: Initializes new tagm db file
-    def do_init( db, ns ):
+    def do_init( db, dbpath, ns ):
         db = TagmDB( '.tagm.db' )
         print 'Initiated tagm database in .tagm.db'
     
@@ -258,11 +242,11 @@ def setup_parser():
     init_parser.set_defaults( func = do_init )
     
     # Add command: Adds tags to objects
-    def do_add( db, ns ):
+    def do_add( db, dbpath, ns ):
         tags = parse_tagpaths( ns.tags != '' and ns.tags.split(',') or [] )
 
 
-        db.add( tags, process_paths( db, ns.objs ) )
+        db.add( tags, process_paths( dbpath, ns.objs ) )
         for f in ns.objs:
             print 'Added', f, 'with tags', ns.tags
 
@@ -272,21 +256,21 @@ def setup_parser():
     add_parser.set_defaults( func = do_add )
 
     # Get command: gets objects tagged with tags
-    def do_get( db, ns ):
+    def do_get( db, dbpath, ns ):
         tags = ns.tags != '' and ns.tags.split(',') or []
         
         if not ns.obj_tags:
             tags = parse_tagpaths( tags )
             objs = db.get( tags, obj_tags = ns.tag_tags, subtags = ns.subtags )
         else:
-            objs = db.get_obj_tags( process_paths( db, tags ) )
+            objs = db.get_obj_tags( process_paths( dbpath, tags ) )
 
         if ns.tag_tags or ns.obj_tags:
             for tag in sorted( join_tagpaths( objs ) ):
                 print tag
         else:
             for obj in objs:
-                print os.path.relpath( os.path.join( db.dbpath, obj ) )
+                print os.path.relpath( os.path.join( dbpath, obj ) )
         
             
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
@@ -303,14 +287,24 @@ if __name__ == '__main__':
     args = setup_parser().parse_args()
 
     if args.func.__name__ != 'do_init':
-        try:
-            db = TagmDB()
-        except DBNotFoundError:
-            print 'Unable to find tagm database!'
-            print 'Please create one by running:'
-            print '%s init' % sys.argv[0]
-            sys.exit(1)
+        # Try and find a .tagr.db file in current dir, if not there continue going up the filetree
+        # if nothing found, error will be raised.
+        curpath = os.path.realpath( '.' )
+        while 1:
+            if os.path.exists( os.path.join( curpath, '.tagm.db' ) ):
+                break
+            elif curpath == '/':
+                print 'Unable to find tagm database!'
+                print 'Please create one by running:'
+                print '%s init' % sys.argv[0]
+                sys.exit(1)
+            else:
+                curpath = os.path.realpath( curpath + '/..' )
+        
+        dbpath = curpath
+        
+        db = TagmDB( os.path.join( dbpath, '.tagm.db' ) )
     else:
-        db = None
+        db = dbpath = None
     
-    args.func( db, args )
+    args.func( db, dbpath, args )
