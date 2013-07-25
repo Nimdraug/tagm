@@ -52,7 +52,7 @@ def test_get_tags_by_tags():
     out = test_cmd( [ 'get', '--tags', '--subtags', 'e' ] )
     assert out == 'a\nd\ne:f\n'
     out = test_cmd( [ 'get', '--tags' ] )
-    assert out == 'a\nb\nc\nd\ne\ne:f\n'
+    assert out == 'a\nb\nc\nd\ne:f\n'
 
 def test_get_tags_by_objs():
     test_add_tags()
