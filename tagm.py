@@ -126,12 +126,6 @@ class TagmDB( object ):
             objs = [ objs ]
         
         for obj in objs:
-            if not os.path.exists( obj ):
-                raise Exception, '%s not found' % obj
-
-            # Add object
-            obj = os.path.relpath( obj, self.dbpath )
-            
             row = self.db.execute( 'select rowid from objs where path = ?', [obj] ).fetchone()
             
             if not row:
@@ -213,7 +207,7 @@ class TagmDB( object ):
         query = "select distinct o0.tag_id from objtags as o0"
         where = []
         
-        objs = self._get_obj_ids( [ os.path.relpath( obj, self.dbpath ) for obj in objs ] )
+        objs = self._get_obj_ids( objs )
         
         for i, obj in enumerate( objs ):
             if i > 0:
@@ -240,6 +234,15 @@ def parse_tagpaths( tagpaths ):
 def join_tagpaths( tagpaths ):
     return [ TAGPATH_SEP.join( tags ) for tags in tagpaths ]
 
+def process_paths( db, paths ):
+    # Ensure that paths exist and are relative to db path
+    for path in paths:
+        if not os.path.exists( path ):
+            raise Exception, '%s not found' % path
+
+        # Add object
+        yield os.path.relpath( path, db.dbpath )
+
 def setup_parser():
     import argparse, sys
 
@@ -258,7 +261,8 @@ def setup_parser():
     def do_add( db, ns ):
         tags = parse_tagpaths( ns.tags != '' and ns.tags.split(',') or [] )
 
-        db.add( tags, ns.objs )
+
+        db.add( tags, process_paths( db, ns.objs ) )
         for f in ns.objs:
             print 'Added', f, 'with tags', ns.tags
 
@@ -275,7 +279,7 @@ def setup_parser():
             tags = parse_tagpaths( tags )
             objs = db.get( tags, obj_tags = ns.tag_tags, subtags = ns.subtags )
         else:
-            objs = db.get_obj_tags( tags )
+            objs = db.get_obj_tags( process_paths( db, tags ) )
 
         if ns.tag_tags or ns.obj_tags:
             for tag in sorted( join_tagpaths( objs ) ):
