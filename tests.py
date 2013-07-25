@@ -11,9 +11,9 @@ def init_dummy_db():
 def test_add_tags():
     init_dummy_db()
     
-    db.add( [ 'a', 'b', 'c' ], [ 'test_data/obj1', 'test_data/obj2' ] )
-    db.add( [ 'd', 'e' ], [ 'test_data/obj1' ] )
-    db.add( [ 'f', 'g' ], [ 'test_data/obj2' ] )
+    db.add( [ 'a', 'b', 'c' ], [ 'obj1', 'obj2' ] )
+    db.add( [ 'd', 'e' ], [ 'obj1' ] )
+    db.add( [ 'f', 'g' ], [ 'obj2' ] )
     
     # TODO: Test for add with find instead of objects, ie:
     # db.add( ['h'], find = [ 'a', 'c' ] )
@@ -21,32 +21,32 @@ def test_add_tags():
     
     # TODO: Should it be passed as [ ['i','j'] ] instead..?
     #       Thus leave the delimiter up to downstream?
-    db.add( [ [ 'i', 'j' ] ], [ 'test_data/obj1' ] )
-    db.add( [ 'i' ], [ 'test_data/obj2' ] )
+    db.add( [ [ 'i', 'j' ] ], [ 'obj1' ] )
+    db.add( [ 'i' ], [ 'obj2' ] )
 
 def test_get_objs_by_tags():
     test_add_tags()
     
     res = db.get( [ 'a', 'b' ] )
-    assert res == [ 'test_data/obj1', 'test_data/obj2' ]
+    assert res == [ 'obj1', 'obj2' ]
     
     res = db.get( [ 'a', 'd' ] )
-    assert res == [ 'test_data/obj1' ]
+    assert res == [ 'obj1' ]
 
     res = db.get( [ 'a', 'f' ] )
-    assert res == [ 'test_data/obj2' ]
+    assert res == [ 'obj2' ]
 
     res = db.get( [ 'd', 'f' ] )
     assert res == []
     
     res = db.get( [ 'a', 'i' ], subtags = True )
-    assert res == [ 'test_data/obj1', 'test_data/obj2' ]
+    assert res == [ 'obj1', 'obj2' ]
     
     res = db.get( [ 'a', [ 'i', 'j' ] ] )
-    assert res == [ 'test_data/obj1' ]
+    assert res == [ 'obj1' ]
     
     res = db.get( [] )
-    assert res == [ 'test_data/obj1', 'test_data/obj2' ]
+    assert res == [ 'obj1', 'obj2' ]
     
     # TODO: Should this raise an exception? Ie TagNotFoundError
     #       Requires TagmDB.get to not handle TagNotFoundError
@@ -78,13 +78,13 @@ def test_get_tags_by_tags():
 def test_get_tags_by_objs():
     test_add_tags()
     
-    res = db.get_obj_tags( [ 'test_data/obj1' ] )
+    res = db.get_obj_tags( [ 'obj1' ] )
     assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ] ]
 
-    res = db.get_obj_tags( [ 'test_data/obj2' ] )
+    res = db.get_obj_tags( [ 'obj2' ] )
     assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ], [ 'i' ] ]
 
-    res = db.get_obj_tags( [ 'test_data/obj1', 'test_data/obj2' ] )
+    res = db.get_obj_tags( [ 'obj1', 'obj2' ] )
     assert res == [ [ 'a' ], [ 'b' ], [ 'c' ] ]
     
     res = db.get_obj_tags( [] )
@@ -92,7 +92,7 @@ def test_get_tags_by_objs():
 
     # TODO: Test for non existing objs
     #       Ie:
-    # res = db.get_obj_tags( [ 'test_data/obj3' ] )
+    # res = db.get_obj_tags( [ 'obj3' ] )
     # assert res == []
     # -- or --
     # check that ObjNotFoundError got raised
