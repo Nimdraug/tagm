@@ -24,9 +24,35 @@ def test_add_tags():
     out = test_cmd( [ 'add', 'a,b,c', 'obj3' ] )
     assert out == 'Added obj3 with tags a,b,c\n'
     out = test_cmd( [ 'add', 'd', 'obj1', 'obj2', 'obj3' ] )
-    assert out == 'Added obj1 with tags d\nAdded obj2 with tags d\nAdded obj3 with tags d\n'
+    assert out == (
+        'Added obj1 with tags d\n'
+        'Added obj2 with tags d\n'
+        'Added obj3 with tags d\n'
+    )
     out = test_cmd( [ 'add', 'e:f', 'obj1' ] )
     assert out == 'Added obj1 with tags e:f\n'
+
+def test_glob_add():
+    test_init()
+    
+    # Create the temporary dir structure
+    os.mkdir( 'dir1' )
+    os.mknod( 'dir1/obj1' )
+    os.mkdir( 'dir1/dir2' )
+    os.mknod( 'dir1/dir2/obj2' )
+    os.mkdir( 'dir1/dir2/dir3' )
+    os.mknod( 'dir1/dir2/dir3/obj3' )
+    
+    out = test_cmd( [ 'add', 'a', '-r', '*/obj1' ] )
+    assert out == 'Added dir1/obj1 with tags a\n'
+
+    out = test_cmd( [ 'add', 'b', '-r', '*/obj*' ] )
+    assert out == (
+        'Added dir1/obj1 with tags b\n'
+        'Added dir1/dir2/obj2 with tags b\n'
+        'Added dir1/dir2/dir3/obj3 with tags b\n'
+    )
+    
 
 def test_get_objs_by_tags():
     # Ensure db and tagged objects are setup
@@ -77,6 +103,9 @@ def test_cmd( cmd, no_err = True ):
         db = tagm.TagmDB( '.tagm.db' ) if cmd[0] != 'init' else None
 
         args.func( db, '', args )
+    except Exception as e:
+        if no_err:
+            raise e
     finally:
         stdout = sys.stdout.getvalue()
         stderr = sys.stderr.getvalue()
@@ -117,6 +146,8 @@ def run_all_tests():
     run_test( test_get_tags_by_tags )
     
     run_test( test_get_tags_by_objs )
+    
+    run_test( test_glob_add )
 
 if __name__ == '__main__':
     run_all_tests()
