@@ -23,6 +23,7 @@ class TagmDB( object ):
         self.db = sqlite3.connect( dbfile )
 
         self.db.row_factory = sqlite3.Row
+        self.db.text_factory = str
         try:
             self.db.execute( 'select * from tags' )
 
@@ -218,14 +219,29 @@ def parse_tagpaths( tagpaths ):
 def join_tagpaths( tagpaths ):
     return [ TAGPATH_SEP.join( tags ) for tags in tagpaths ]
 
-def process_paths( dbpath, paths ):
+def process_paths( dbpath, paths, recursive = False ):
+    import fnmatch
+    
+    def list_recursive():
+        for root, dirs, files in os.walk( '.' ):
+            for name in files:
+                yield os.path.join( root, name )
+    
     # Ensure that paths exist and are relative to db path
     for path in paths:
+        objs_found = False
         if not os.path.exists( path ):
-            raise Exception, '%s not found' % path
-
-        # Add object
-        yield os.path.relpath( path, dbpath )
+            # Does not exist, might be a glob path tho
+            for f in os.listdir( '.' ) if not recursive else list_recursive():
+                if fnmatch.fnmatch( f, path ):
+                    objs_found = True
+                    yield os.path.relpath( f, dbpath )
+            
+            if not objs_found:
+                raise IOError, 'File not found: %s' % path
+                    
+        else:
+            yield os.path.relpath( path, dbpath )
 
 def setup_parser():
     import argparse, sys
@@ -245,19 +261,22 @@ def setup_parser():
     def do_add( db, dbpath, ns ):
         tags = parse_tagpaths( ns.tags != '' and ns.tags.split(',') or [] )
 
-
-        db.add( tags, process_paths( dbpath, ns.objs ) )
-        for f in ns.objs:
+        for f in process_paths( dbpath, ns.objs, ns.recursive ):
+            db.add( tags, f )
             print 'Added', f, 'with tags', ns.tags
 
     add_parser = subparsers.add_parser( 'add', description = 'Will add the specified tags to the specified objects' )
     add_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
+    add_parser.add_argument( '-r', '--recursive', action = 'store_true', help = 'Indicate that the list of objects is actually a list of recursive glob paths' )
     add_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be tagged' )
     add_parser.set_defaults( func = do_add )
 
     # Get command: gets objects tagged with tags
     def do_get( db, dbpath, ns ):
-        tags = ns.tags != '' and ns.tags.split(',') or []
+        if isinstance( ns.tags, list ):
+            tags = ns.tags
+        else:
+            tags = ns.tags != '' and ns.tags.split(',') or []
         
         if not ns.obj_tags:
             tags = parse_tagpaths( tags )
@@ -274,7 +293,7 @@ def setup_parser():
         
             
     get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
-    get_parser.add_argument( 'tags', nargs = '?', default = '',
+    get_parser.add_argument( 'tags', nargs = '*', default = [],
                         help = 'List of tagpaths separated by comma' )
     get_parser.add_argument( '--tags', action = 'store_true', dest = 'tag_tags' )
     get_parser.add_argument( '--subtags', action = 'store_true' )
