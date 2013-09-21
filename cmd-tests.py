@@ -52,7 +52,17 @@ def test_glob_add():
         'Added dir1/dir2/obj2 with tags b\n'
         'Added dir1/dir2/dir3/obj3 with tags b\n'
     )
+
+def test_add_symlink():
+    test_init()
     
+    # Create file structure
+    os.mknod( 'obj1' )
+    os.mkdir( 'dir1' )
+    os.symlink( '../obj1', 'dir1/obj2' )
+    
+    out = test_cmd( [ 'add', 'a', 'dir1/obj2' ] )
+    assert out == 'Added obj1 with tags a\n'
 
 def test_get_objs_by_tags():
     # Ensure db and tagged objects are setup
@@ -148,6 +158,9 @@ def run_all_tests():
     run_test( test_get_tags_by_objs )
     
     run_test( test_glob_add )
+    
+    run_test( test_add_symlink )
+
 
 if __name__ == '__main__':
     run_all_tests()

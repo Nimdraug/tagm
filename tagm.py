@@ -235,13 +235,13 @@ def process_paths( dbpath, paths, recursive = False ):
             for f in os.listdir( '.' ) if not recursive else list_recursive():
                 if fnmatch.fnmatch( f, path ):
                     objs_found = True
-                    yield os.path.relpath( f, dbpath )
+                    yield os.path.relpath( os.path.realpath( f ), dbpath )
             
             if not objs_found:
                 raise IOError, 'File not found: %s' % path
                     
         else:
-            yield os.path.relpath( path, dbpath )
+            yield os.path.relpath( os.path.realpath( path ), dbpath )
 
 def setup_parser():
     import argparse, sys
