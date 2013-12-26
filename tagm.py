@@ -273,10 +273,14 @@ def setup_parser():
 
     # Get command: gets objects tagged with tags
     def do_get( db, dbpath, ns ):
-        if isinstance( ns.tags, list ):
-            tags = ns.tags
+        if not isinstance( ns.tags, list ):
+            tags = [ ns.tags ]
+        elif ns.tags == '':
+            tags = []
         else:
-            tags = ns.tags != '' and ns.tags.split(',') or []
+            tags = ns.tags
+        
+        tags = sum( [ t.split(',') for t in tags ], [] )
         
         if not ns.obj_tags:
             tags = parse_tagpaths( tags )
@@ -304,7 +308,7 @@ def setup_parser():
 
 if __name__ == '__main__':
     args = setup_parser().parse_args()
-
+    
     if args.func.__name__ != 'do_init':
         # Try and find a .tagr.db file in current dir, if not there continue going up the filetree
         # if nothing found, error will be raised.
