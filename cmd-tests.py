@@ -68,6 +68,21 @@ def test_add_symlink():
     out = test_cmd( [ 'get', 'a' ] )
     assert out == 'obj1\n'
 
+def test_add_symlink_no_follow():
+    test_init()
+    
+    # Create file structure
+    os.mknod( 'obj1' )
+    os.mkdir( 'dir1' )
+    os.symlink( '../obj1', 'dir1/obj2' )
+    
+    out = test_cmd( [ 'add', '--no-follow', 'a', 'dir1/obj2' ] )
+    assert out == 'Added dir1/obj2 with tags a\n'
+
+    # Ensure the symlink was not followed
+    out = test_cmd( [ 'get', 'a' ] )
+    assert out == 'dir1/obj2\n'
+
 def test_get_objs_by_tags():
     # Ensure db and tagged objects are setup
     test_add_tags()
@@ -165,7 +180,8 @@ def run_all_tests():
     run_test( test_glob_add )
     
     run_test( test_add_symlink )
-
+    
+    run_test( test_add_symlink_no_follow )
 
 if __name__ == '__main__':
     run_all_tests()
