@@ -90,12 +90,13 @@ def test_get_tags_by_objs():
     out = test_cmd( [ 'get', '--obj-tags' ] )
     assert out == 'a\nb\nc\nd\ne:f\n'
 
-def test_cmd( cmd, no_err = True ):
-    # Highjack stdout and stderr for a bit
-    oldout, olderr = sys.stdout, sys.stderr
+def test_cmd( cmd, no_err = True, grab_std = True ):
+    if grab_std:
+        # Highjack stdout and stderr for a bit
+        oldout, olderr = sys.stdout, sys.stderr
 
-    sys.stdout = StringIO.StringIO()
-    sys.stderr = StringIO.StringIO()
+        sys.stdout = StringIO.StringIO()
+        sys.stderr = StringIO.StringIO()
     
     try:
         args = tagm.setup_parser().parse_args( cmd )
@@ -103,15 +104,15 @@ def test_cmd( cmd, no_err = True ):
         db = tagm.TagmDB( '.tagm.db' ) if cmd[0] != 'init' else None
 
         args.func( db, '', args )
-    except Exception as e:
-        if no_err:
-            raise e
     finally:
-        stdout = sys.stdout.getvalue()
-        stderr = sys.stderr.getvalue()
-    
-        # Restore stds before return
-        sys.stdout, sys.stderr = oldout, olderr
+        if grab_std:
+            stdout = sys.stdout.getvalue()
+            stderr = sys.stderr.getvalue()
+        
+            # Restore stds before return
+            sys.stdout, sys.stderr = oldout, olderr
+        else:
+            stdout = stderr = ''
 
     if no_err:
         assert stderr == ''
