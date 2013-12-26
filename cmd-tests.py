@@ -64,6 +64,10 @@ def test_add_symlink():
     out = test_cmd( [ 'add', 'a', 'dir1/obj2' ] )
     assert out == 'Added obj1 with tags a\n'
 
+    # Ensure the symlink was infact followed
+    out = test_cmd( [ 'get', 'a' ] )
+    assert out == 'obj1\n'
+
 def test_get_objs_by_tags():
     # Ensure db and tagged objects are setup
     test_add_tags()
