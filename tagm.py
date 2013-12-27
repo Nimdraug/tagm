@@ -253,14 +253,15 @@ def setup_parser():
     import argparse, sys
 
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(title='subcommands')
 
     # Init command: Initializes new tagm db file
     def do_init( db, dbpath, ns ):
         db = TagmDB( '.tagm.db' )
         print 'Initiated tagm database in .tagm.db'
     
-    init_parser = subparsers.add_parser( 'init', description = 'Will initialzie a tagm database in a file called .tagm.db located in the current directory' )
+    init_help = 'Will initialzie a tagm database in a file called .tagm.db located in the current directory'
+    init_parser = subparsers.add_parser( 'init', help = init_help, description = init_help )
     init_parser.set_defaults( func = do_init )
     
     # Add command: Adds tags to objects
@@ -271,10 +272,12 @@ def setup_parser():
             db.add( tags, f )
             print 'Added', f, 'with tags', ns.tags
 
-    add_parser = subparsers.add_parser( 'add', description = 'Will add the specified tags to the specified objects' )
+    add_help = 'Will add the specified tags to the specified objects'
+    add_parser = subparsers.add_parser( 'add', help = add_help, description = add_help )
     add_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
-    add_parser.add_argument( '-r', '--recursive', action = 'store_true', help = 'Indicate that the list of objects is actually a list of recursive glob paths' )
-    add_parser.add_argument( '-f', '--no-follow', dest = 'follow', action = 'store_false' )
+    add_parser.add_argument( '-r', '--recursive', action = 'store_true', help = 'the list of objects is actually a list of recursive glob paths' )
+    add_parser.add_argument( '-f', '--no-follow', dest = 'follow', action = 'store_false',
+                        help = 'do not follow any symlinks')
     add_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be tagged' )
     add_parser.set_defaults( func = do_add )
 
@@ -303,12 +306,16 @@ def setup_parser():
                 print os.path.relpath( os.path.join( dbpath, obj ) )
         
             
-    get_parser = subparsers.add_parser( 'get', description = 'Will list all the objects that are taged with all of the specified tags.' )
+    get_help = 'Will list all the objects that are taged with all of the specified tags.'
+    get_parser = subparsers.add_parser( 'get', help = get_help, description = get_help )
     get_parser.add_argument( 'tags', nargs = '*', default = [],
-                        help = 'List of tagpaths separated by comma' )
-    get_parser.add_argument( '--tags', action = 'store_true', dest = 'tag_tags' )
-    get_parser.add_argument( '--subtags', action = 'store_true' )
-    get_parser.add_argument( '--obj-tags', action = 'store_true' )
+                        help = 'list of tagpaths (or objects incase --obj-tags is used) separated by comma' )
+    get_parser.add_argument( '--tags', action = 'store_true', dest = 'tag_tags',
+                        help = 'output the tags of the found objects instead of the objects themselves')
+    get_parser.add_argument( '--subtags', action = 'store_true',
+                        help = 'include subtags of the specified tags in the query')
+    get_parser.add_argument( '--obj-tags', action = 'store_true',
+                        help = 'lookup the tags of the specified objects instead of the other way around')
     get_parser.set_defaults( func = do_get )
     
     return parser
