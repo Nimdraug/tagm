@@ -194,6 +194,9 @@ class TagmDB( object ):
         
         objs = self._get_obj_ids( objs )
         
+        if not objs:
+            return []
+        
         for i, obj in enumerate( objs ):
             if i > 0:
                 query += " left join objtags as o%s on ( o0.tag_id = o%s.tag_id )" % ( i, i )
