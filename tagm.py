@@ -24,12 +24,10 @@ class TagmDB( object ):
 
         self.db.row_factory = sqlite3.Row
         self.db.text_factory = str
-        try:
-            self.db.execute( 'select * from tags limit 1' )
-
-        except sqlite3.OperationalError:
-            # Table does not exist, create it!
-
+        
+        # Check if the tags table exists
+        if not self.db.execute( "select name from sqlite_master WHERE type='table' AND name='tags'" ).fetchone():
+            # tags Table does not exist, assume all table are missing, so create them
             # Objs ( rowid, path )
             self.db.execute( 'create table objs ( path )' )
             
