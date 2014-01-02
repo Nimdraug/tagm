@@ -117,7 +117,7 @@ def test_get_tags_by_objs():
     out = test_cmd( [ 'get', '--obj-tags', 'obj2,obj3' ] )
     assert out == 'a\nb\nd\n'
     out = test_cmd( [ 'get', '--obj-tags' ] )
-    assert out == 'a\nb\nc\nd\ne:f\n'
+    assert out == ''
 
 def test_cmd( cmd, no_err = True, grab_std = True ):
     if grab_std:
