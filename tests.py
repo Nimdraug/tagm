@@ -73,7 +73,7 @@ def test_get_tags_by_tags():
     assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ] ]
 
     res = db.get( [ 'i' ], True, True )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ], [ 'f' ], [ 'g' ] ]
+    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ] ]
 
 def test_get_tags_by_objs():
     test_add_tags()
@@ -88,7 +88,7 @@ def test_get_tags_by_objs():
     assert res == [ [ 'a' ], [ 'b' ], [ 'c' ] ]
     
     res = db.get_obj_tags( [] )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'f' ], [ 'g' ], [ 'i', 'j' ], [ 'i' ] ]
+    assert res == []
 
     # TODO: Test for non existing objs
     #       Ie:
