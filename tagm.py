@@ -25,7 +25,7 @@ class TagmDB( object ):
         self.db.row_factory = sqlite3.Row
         self.db.text_factory = str
         try:
-            self.db.execute( 'select * from tags' )
+            self.db.execute( 'select * from tags limit 1' )
 
         except sqlite3.OperationalError:
             # Table does not exist, create it!
