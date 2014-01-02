@@ -30,12 +30,16 @@ class TagmDB( object ):
             # tags Table does not exist, assume all table are missing, so create them
             # Objs ( rowid, path )
             self.db.execute( 'create table objs ( path )' )
+            self.db.execute( 'create unique index obj_paths on objs (path)' )
             
             # Tags ( rowid, tag, parent )
             self.db.execute( 'create table tags ( tag, parent )' )
+            self.db.execute( 'create unique index tag_tags on tags (tag,parent)' )
             
             # ObjTags ( rowid, tag_id, obj_id )
             self.db.execute( 'create table objtags ( tag_id, obj_id )' )
+            self.db.execute( 'create index objtag_tags on objtags (tag_id)' )
+            self.db.execute( 'create index objtag_objs on objtags (obj_id)' )
             
             self.db.commit()
 
