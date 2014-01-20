@@ -1,28 +1,26 @@
+#!/usr/bin/env python2
 import tagm
-import sqlite3
+import unittest
 
-db = None
+class TagmTestCase( unittest.TestCase ):
+    def setUp( self ):
+        self.db = tagm.TagmDB( ':memory:' )
 
-def init_dummy_db():
-    global db
-    
-    db = tagm.TagmDB( ':memory:' )
+class TestAdd( TagmTestCase ):
+    def test_add_single_obj( self ):
+        self.assertIsNone( self.db.add( [ 'a' ], [ 'obj1' ] ) )
 
-def test_add_tags():
-    init_dummy_db()
+    def test_add_multiple_obj( self ):
+        self.assertIsNone( self.db.add( [ 'a' ], [ 'obj1', 'obj2' ] ) )
     
-    db.add( [ 'a', 'b', 'c' ], [ 'obj1', 'obj2' ] )
-    db.add( [ 'd', 'e' ], [ 'obj1' ] )
-    db.add( [ 'f', 'g' ], [ 'obj2' ] )
+    def test_add_multiple_tags( self ):
+        self.assertIsNone( self.db.add( [ 'a', 'b' ], [ 'obj1' ] ) )
     
-    # TODO: Test for add with find instead of objects, ie:
-    # db.add( ['h'], find = [ 'a', 'c' ] )
-    # should tag both obj 1 and 2 with h
+    def test_add_multiple_both( self ):
+        self.assertIsNone( self.db.add( [ 'a', 'b' ], [ 'obj1', 'obj2' ] ) )
     
-    # TODO: Should it be passed as [ ['i','j'] ] instead..?
-    #       Thus leave the delimiter up to downstream?
-    db.add( [ [ 'i', 'j' ] ], [ 'obj1' ] )
-    db.add( [ 'i' ], [ 'obj2' ] )
+    def test_add_subtag( self ):
+        self.assertIsNone( self.db.add( [ [ 'a', 'b' ] ], [ 'obj1' ] ) )
 
 def test_get_objs_by_tags():
     test_add_tags()
@@ -114,4 +112,4 @@ def run_all_tests():
     run_test( test_get_tags_by_objs )
 
 if __name__ == '__main__':
-    run_all_tests()
+    unittest.main()
