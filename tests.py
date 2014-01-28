@@ -52,28 +52,23 @@ class TestGetObjsByTags( TagmGetTestCase ):
         #       Requires TagmDB.get to not handle TagNotFoundError
         #       Question is, is that desired behavior?
         self.assertEqual( self.db.get( [ 'e' ] ), [] )
-    
-def test_get_tags_by_tags():
-    test_add_tags()
-    
-    res = db.get( [ 'a', 'b' ], True )
-    assert res == [ [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ], [ 'f' ], [ 'g' ], [ 'i' ] ]
-    
-    res = db.get( ['a', 'b', 'd' ], True )
-    assert res == [ [ 'c' ], [ 'e' ], [ 'i', 'j' ] ]
 
-    res = db.get( ['a', 'b', 'f' ], True )
-    assert res == [ [ 'c' ], [ 'g' ], [ 'i' ] ]
-
-    res = db.get( ['a', 'b', 'e', 'f' ], True )
-    assert res == []
+class TestGetTagsByTags( TagmGetTestCase ):
+    def test_get_single_tag( self ):
+        self.assertItemsEqual( self.db.get( [ 'a' ], obj_tags = True ), [ [ 'b' ], [ 'c' ], [ 'c', 'd' ] ] )
     
-    res = db.get( [ 'i' ], True )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ] ]
+    def test_get_multiple_tags( self ):
+        self.assertItemsEqual( self.db.get( [ 'a', 'b' ], obj_tags = True ), [ [ 'c' ] ] )
 
-    res = db.get( [ 'i' ], True, True )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ] ]
-
+    def test_get_subtag( self ):
+        self.assertEqual( self.db.get( [ [ 'c', 'd' ] ], obj_tags = True ), [ [ 'a' ] ] )
+    
+    def test_get_subtag_parent( self ):
+        self.assertEqual( self.db.get( [ [ 'c' ] ], obj_tags = True ), [ [ 'a' ], [ 'b' ] ] )
+    
+    def test_get_subtag_parent_include_subtags( self ):
+        self.assertEqual( self.db.get( [ 'c' ], obj_tags = True, subtags = True ), [ [ 'a' ], [ 'b' ], [ 'c', 'd' ] ] )
+        
 def test_get_tags_by_objs():
     test_add_tags()
     
