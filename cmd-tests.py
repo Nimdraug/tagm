@@ -1,4 +1,4 @@
-#/usr/bin/env python2
+#!/usr/bin/env python2
 import os, shutil, tagm, sys, StringIO, unittest
 
 class TagmCommandTestCase( unittest.TestCase ):
@@ -41,33 +41,45 @@ class TestInit( TagmCommandTestCase ):
         
         self.assertEqual( out, 'Initiated tagm database in .tagm.db\n' )
         self.assertTrue( os.stat( '.tagm.db' ) )
-    
-    assert out == 'Initiated tagm database in .tagm.db\n'
-    assert os.stat( '.tagm.db' )
 
-def test_add_tags():
-    # Ensure db is setup
-    test_init()
+class TestAdd( TagmCommandTestCase ):
+    def setUp( self ):
+        super( TestAdd, self ).setUp()
+
+        os.mknod( 'obj1' )
+        os.mknod( 'obj2' )
+
+    def test_add_single_tag( self ):
+        out, err = self.run_command( [ 'add', 'a', 'obj1' ] )
+        self.assertEqual( out, 'Added obj1 with tags a\n' )
     
-    # Add some files
-    os.mknod( 'obj1' )
-    os.mknod( 'obj2' )
-    os.mknod( 'obj3' )
+    def test_add_multiple_tags( self ):
+        out, err = self.run_command( [ 'add', 'a,b', 'obj2' ] )
+        self.assertEqual( out, 'Added obj2 with tags a,b\n' )
     
-    out = test_cmd( [ 'add', 'a', 'obj1' ] )
-    assert out == 'Added obj1 with tags a\n'
-    out = test_cmd( [ 'add', 'a,b', 'obj2' ] )
-    assert out == 'Added obj2 with tags a,b\n'
-    out = test_cmd( [ 'add', 'a,b,c', 'obj3' ] )
-    assert out == 'Added obj3 with tags a,b,c\n'
-    out = test_cmd( [ 'add', 'd', 'obj1', 'obj2', 'obj3' ] )
-    assert out == (
-        'Added obj1 with tags d\n'
-        'Added obj2 with tags d\n'
-        'Added obj3 with tags d\n'
-    )
-    out = test_cmd( [ 'add', 'e:f', 'obj1' ] )
-    assert out == 'Added obj1 with tags e:f\n'
+    def test_add_multiple_objs( self ):
+        out, err = self.run_command( [ 'add', 'c', 'obj1', 'obj2' ] )
+        self.assertEqual( out, (
+            'Added obj1 with tags c\n'
+            'Added obj2 with tags c\n'
+        ) )
+
+    def test_add_subtag( self ):
+        out, err = self.run_command( [ 'add', 'a:b', 'obj1' ] )
+        self.assertEqual( out, 'Added obj1 with tags a:b\n' )
+    
+
+class TagmCommandGetTestCase( TagmCommandTestCase ):
+    pass
+
+class TestGetObjsByTags( TagmCommandGetTestCase ):
+    pass
+    
+class TestGetTagsByTags( TagmCommandGetTestCase ):
+    pass
+
+class TestGetTagsByObjs( TagmCommandGetTestCase ):
+    pass
 
 def test_glob_add():
     test_init()
@@ -155,7 +167,7 @@ def test_get_tags_by_objs():
     assert out == 'a\nb\nd\n'
     out = test_cmd( [ 'get', '--obj-tags' ] )
     assert out == ''
-
+'''
 def test_cmd( cmd, no_err = True, grab_std = True ):
     if grab_std:
         # Highjack stdout and stderr for a bit
@@ -165,11 +177,6 @@ def test_cmd( cmd, no_err = True, grab_std = True ):
         sys.stderr = StringIO.StringIO()
     
     try:
-        args = tagm.setup_parser().parse_args( cmd )
-        
-        db = tagm.TagmDB( '.tagm.db' ) if cmd[0] != 'init' else None
-
-        args.func( db, '', args )
     finally:
         if grab_std:
             stdout = sys.stdout.getvalue()
@@ -219,6 +226,6 @@ def run_all_tests():
     run_test( test_add_symlink )
     
     run_test( test_add_symlink_no_follow )
-
+'''
 if __name__ == '__main__':
     unittest.main()
