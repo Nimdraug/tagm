@@ -68,29 +68,22 @@ class TestGetTagsByTags( TagmGetTestCase ):
     
     def test_get_subtag_parent_include_subtags( self ):
         self.assertEqual( self.db.get( [ 'c' ], obj_tags = True, subtags = True ), [ [ 'a' ], [ 'b' ], [ 'c', 'd' ] ] )
-        
-def test_get_tags_by_objs():
-    test_add_tags()
+
+class TestGetTagsByObjs( TagmGetTestCase ):
+    def test_get_single_obj( self ):
+        self.assertItemsEqual( self.db.get_obj_tags( [ 'obj1' ] ), [ [ 'a' ], [ 'c', 'd' ] ] )
     
-    res = db.get_obj_tags( [ 'obj1' ] )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'd' ], [ 'e' ], [ 'i', 'j' ] ]
-
-    res = db.get_obj_tags( [ 'obj2' ] )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ], [ 'f' ], [ 'g' ], [ 'i' ] ]
-
-    res = db.get_obj_tags( [ 'obj1', 'obj2' ] )
-    assert res == [ [ 'a' ], [ 'b' ], [ 'c' ] ]
+    def test_get_multiple_obj( self ):
+        self.assertItemsEqual( self.db.get_obj_tags( [ 'obj2', 'obj3' ] ), [ [ 'a' ], [ 'b' ] ] )
     
-    res = db.get_obj_tags( [] )
-    assert res == []
-
-    # TODO: Test for non existing objs
-    #       Ie:
-    # res = db.get_obj_tags( [ 'obj3' ] )
-    # assert res == []
-    # -- or --
-    # check that ObjNotFoundError got raised
-
+    def test_get_invalid_obj( self ):
+        # TODO: Concider raising ObjNotFoundError in this case
+        self.assertItemsEqual( self.db.get_obj_tags( [ 'obj4' ] ), [] )
+    
+    def test_get_no_obj( self ):
+        # TODO: Concider raising Exception here as well
+        self.assertItemsEqual( self.db.get_obj_tags( [] ), [] )
+    
 def run_test( test_func ):
     print 'Running %s...' % test_func.__name__,
     
