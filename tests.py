@@ -84,21 +84,5 @@ class TestGetTagsByObjs( TagmGetTestCase ):
         # TODO: Concider raising Exception here as well
         self.assertItemsEqual( self.db.get_obj_tags( [] ), [] )
     
-def run_test( test_func ):
-    print 'Running %s...' % test_func.__name__,
-    
-    test_func()
-    
-    print 'Passed!'
-
-def run_all_tests():
-    run_test( test_add_tags )
-    
-    run_test( test_get_objs_by_tags )
-    
-    run_test( test_get_tags_by_tags )
-    
-    run_test( test_get_tags_by_objs )
-
 if __name__ == '__main__':
     unittest.main()
