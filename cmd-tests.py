@@ -34,10 +34,13 @@ class TagmCommandTestCase( unittest.TestCase ):
         os.chdir( '..' )
         shutil.rmtree( 'test-data' )
 
-def test_init():
-    #python2 tagm.py init'
-    # Should result in a .tagm.db file being created
-    out = test_cmd( [ 'init' ] )
+
+class TestInit( TagmCommandTestCase ):
+    def runTest( self ):
+        out,err = self.run_command( [ 'init' ] )
+        
+        self.assertEqual( out, 'Initiated tagm database in .tagm.db\n' )
+        self.assertTrue( os.stat( '.tagm.db' ) )
     
     assert out == 'Initiated tagm database in .tagm.db\n'
     assert os.stat( '.tagm.db' )
