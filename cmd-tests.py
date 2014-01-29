@@ -1,4 +1,38 @@
-import os, shutil, tagm, sys, StringIO
+#/usr/bin/env python2
+import os, shutil, tagm, sys, StringIO, unittest
+
+class TagmCommandTestCase( unittest.TestCase ):
+    def setUp( self ):
+        self.oldout, self.olderr = sys.stdout, sys.stderr
+
+        sys.stdout = StringIO.StringIO()
+        sys.stderr = StringIO.StringIO()
+
+        self.db = tagm.TagmDB( '.tagm.db' )
+
+        os.mkdir( 'test-data' )
+        os.chdir( 'test-data' )
+        
+        self.addCleanup( self.cleanup_files )
+
+    def run_command( self, cmd ):
+        args = tagm.setup_parser().parse_args( cmd )
+        
+        args.func( self.db, '', args )
+        
+        stdout = sys.stdout.getvalue()
+        stderr = sys.stderr.getvalue()
+        
+        return stdout, stderr
+        
+    
+    def tearDown( self ):
+        sys.stdout = self.oldout
+        sys.stderr = self.olderr
+
+    def cleanup_files( self ):
+        os.chdir( '..' )
+        shutil.rmtree( 'test-data' )
 
 def test_init():
     #python2 tagm.py init'
@@ -184,4 +218,4 @@ def run_all_tests():
     run_test( test_add_symlink_no_follow )
 
 if __name__ == '__main__':
-    run_all_tests()
+    unittest.main()
