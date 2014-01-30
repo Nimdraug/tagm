@@ -67,7 +67,30 @@ class TestAdd( TagmCommandTestCase ):
     def test_add_subtag( self ):
         out, err = self.run_command( [ 'add', 'a:b', 'obj1' ] )
         self.assertEqual( out, 'Added obj1 with tags a:b\n' )
+
+class TestAddGlob( TagmCommandTestCase ):
+    def setUp( self ):
+        super( TestAddGlob, self ).setUp()
+
+        os.mkdir( 'dir1' )
+        os.mknod( 'dir1/obj1' )
+        os.mkdir( 'dir1/dir2' )
+        os.mknod( 'dir1/dir2/obj2' )
+        os.mkdir( 'dir1/dir2/dir3' )
+        os.mknod( 'dir1/dir2/dir3/obj3' )
+
+    def test_add_single_obj( self ):
+        out, err = self.run_command( [ 'add', 'a', '-r', '*/obj1' ] )
+        self.assertEqual( out, 'Added dir1/obj1 with tags a\n' )
     
+    def test_add_multiple_obj( self ):
+        out, err = self.run_command( [ 'add', 'b', '-r', '*/obj*' ] )
+        self.assertEqual( out, (
+            'Added dir1/obj1 with tags b\n'
+            'Added dir1/dir2/obj2 with tags b\n'
+            'Added dir1/dir2/dir3/obj3 with tags b\n'
+        ) )
+        
 
 class TagmCommandGetTestCase( TagmCommandTestCase ):
     pass
@@ -81,26 +104,6 @@ class TestGetTagsByTags( TagmCommandGetTestCase ):
 class TestGetTagsByObjs( TagmCommandGetTestCase ):
     pass
 
-def test_glob_add():
-    test_init()
-    
-    # Create the temporary dir structure
-    os.mkdir( 'dir1' )
-    os.mknod( 'dir1/obj1' )
-    os.mkdir( 'dir1/dir2' )
-    os.mknod( 'dir1/dir2/obj2' )
-    os.mkdir( 'dir1/dir2/dir3' )
-    os.mknod( 'dir1/dir2/dir3/obj3' )
-    
-    out = test_cmd( [ 'add', 'a', '-r', '*/obj1' ] )
-    assert out == 'Added dir1/obj1 with tags a\n'
-
-    out = test_cmd( [ 'add', 'b', '-r', '*/obj*' ] )
-    assert out == (
-        'Added dir1/obj1 with tags b\n'
-        'Added dir1/dir2/obj2 with tags b\n'
-        'Added dir1/dir2/dir3/obj3 with tags b\n'
-    )
 
 def test_add_symlink():
     test_init()
