@@ -25,6 +25,7 @@ class TagmCommandTestCase( unittest.TestCase ):
         
         sys.stdout.truncate( 0 )
         sys.stderr.truncate( 0 )
+        
         return stdout, stderr
         
     
@@ -93,6 +94,30 @@ class TestAddGlob( TagmCommandTestCase ):
             'Added dir1/dir2/dir3/obj3 with tags b\n'
         ) )
         
+class TestAddSymlink( TagmCommandTestCase ):
+    def setUp( self ):
+        super( TestAddSymlink, self ).setUp()
+
+        os.mknod( 'obj1' )
+        os.mkdir( 'dir1' )
+        os.symlink( '../obj1', 'dir1/obj2' )
+
+    def test_add_symlink( self ):
+        out, err = self.run_command( [ 'add', 'a', 'dir1/obj2' ] )
+        self.assertEqual( out, 'Added obj1 with tags a\n' )
+
+        # Ensure the symlink was infact followed
+        out, err = self.run_command( [ 'get', 'a' ] )
+        self.assertEqual( out, 'obj1\n' )
+    
+    def test_add_symlink_no_follow( self ):
+        out, err = self.run_command( [ 'add', '--no-follow', 'a', 'dir1/obj2' ] )
+        self.assertEqual( out, 'Added dir1/obj2 with tags a\n' )
+
+        # Ensure the symlink was not followed
+        out, err = self.run_command( [ 'get', 'a' ] )
+        self.assertEqual( out, 'dir1/obj2\n' )
+
 
 class TagmCommandGetTestCase( TagmCommandTestCase ):
     pass
@@ -105,37 +130,6 @@ class TestGetTagsByTags( TagmCommandGetTestCase ):
 
 class TestGetTagsByObjs( TagmCommandGetTestCase ):
     pass
-
-
-def test_add_symlink():
-    test_init()
-    
-    # Create file structure
-    os.mknod( 'obj1' )
-    os.mkdir( 'dir1' )
-    os.symlink( '../obj1', 'dir1/obj2' )
-    
-    out = test_cmd( [ 'add', 'a', 'dir1/obj2' ] )
-    assert out == 'Added obj1 with tags a\n'
-
-    # Ensure the symlink was infact followed
-    out = test_cmd( [ 'get', 'a' ] )
-    assert out == 'obj1\n'
-
-def test_add_symlink_no_follow():
-    test_init()
-    
-    # Create file structure
-    os.mknod( 'obj1' )
-    os.mkdir( 'dir1' )
-    os.symlink( '../obj1', 'dir1/obj2' )
-    
-    out = test_cmd( [ 'add', '--no-follow', 'a', 'dir1/obj2' ] )
-    assert out == 'Added dir1/obj2 with tags a\n'
-
-    # Ensure the symlink was not followed
-    out = test_cmd( [ 'get', 'a' ] )
-    assert out == 'dir1/obj2\n'
 
 def test_get_objs_by_tags():
     # Ensure db and tagged objects are setup
