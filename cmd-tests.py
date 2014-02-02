@@ -8,11 +8,11 @@ class TagmCommandTestCase( unittest.TestCase ):
         sys.stdout = StringIO.StringIO()
         sys.stderr = StringIO.StringIO()
 
-        self.db = tagm.TagmDB( '.tagm.db' )
-
         os.mkdir( 'test-data' )
         os.chdir( 'test-data' )
-        
+
+        self.db = tagm.TagmDB( '.tagm.db' )
+
         self.addCleanup( self.cleanup_files )
 
     def run_command( self, cmd ):
