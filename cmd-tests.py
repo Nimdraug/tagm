@@ -23,6 +23,8 @@ class TagmCommandTestCase( unittest.TestCase ):
         stdout = sys.stdout.getvalue()
         stderr = sys.stderr.getvalue()
         
+        sys.stdout.truncate( 0 )
+        sys.stderr.truncate( 0 )
         return stdout, stderr
         
     
