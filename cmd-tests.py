@@ -122,6 +122,11 @@ class TestAddSymlink( TagmCommandTestCase ):
 class TagmCommandGetTestCase( TagmCommandTestCase ):
     def setUp( self ):
         super( TagmCommandGetTestCase, self ).setUp()
+
+        os.mknod( 'obj1' )
+        os.mknod( 'obj2' )
+        os.mknod( 'obj3' )
+        os.mknod( 'obj4' )
          
         self.db.add( [ 'a' ], [ 'obj1', 'obj2', 'obj3' ] )
         self.db.add( [ 'b' ], [ 'obj2', 'obj3' ] )
@@ -146,33 +151,40 @@ class TestGetObjsByTags( TagmCommandGetTestCase ):
         self.assertEqual( out, 'obj3\nobj1\n' )
     
 class TestGetTagsByTags( TagmCommandGetTestCase ):
-    pass
+    def test_get_single_tag( self ):
+        out, err = self.run_command( [ 'get', '--tags', 'b' ] )
+        self.assertEqual( out, 'a\nc\n' )
+
+    def test_get_multiple_tags( self ):
+        out, err = self.run_command( [ 'get', '--tags', 'b,c' ] )
+        self.assertEqual( out, 'a\n' )
+    
+    def test_get_subtag( self ):
+        out, err = self.run_command( [ 'get', '--tags', 'c:d' ] )
+        self.assertEqual( out, 'a\n' )
+
+    def test_get_subtag_parent_include_subtags( self ):
+        out, err = self.run_command( [ 'get', '--tags', '--subtags', 'c' ] )
+        self.assertEqual( out, 'a\nb\nc:d\n' )
 
 class TestGetTagsByObjs( TagmCommandGetTestCase ):
-    pass
+    # TODO: Add test for non existing file
+    def test_get_single_obj( self ):
+        out, err = self.run_command( [ 'get', '--obj-tags', 'obj1' ] )
+        self.assertEqual( out, 'a\nc:d\n' )
 
-def test_get_tags_by_tags():
-    # Ensure db and tagged objects are setup
-    test_add_tags()
-    
-    out = test_cmd( [ 'get', '--tags', 'a,b' ] )
-    assert out == 'c\nd\n'
-    out = test_cmd( [ 'get', '--tags', 'e:f' ] )
-    assert out == 'a\nd\n'
-    out = test_cmd( [ 'get', '--tags', '--subtags', 'e' ] )
-    assert out == 'a\nd\ne:f\n'
-    out = test_cmd( [ 'get', '--tags' ] )
-    assert out == 'a\nb\nc\nd\ne:f\n'
+    def test_get_multiple_obj( self ):
+        out, err = self.run_command( [ 'get', '--obj-tags', 'obj2', 'obj3' ] )
+        self.assertEqual( out, 'a\nb\n' )
 
-def test_get_tags_by_objs():
-    test_add_tags()
-    
-    out = test_cmd( [ 'get', '--obj-tags', 'obj1' ] )
-    assert out == 'a\nd\ne:f\n'
-    out = test_cmd( [ 'get', '--obj-tags', 'obj2,obj3' ] )
-    assert out == 'a\nb\nd\n'
-    out = test_cmd( [ 'get', '--obj-tags' ] )
-    assert out == ''
+    def test_get_invalid_obj( self ):
+        out, err = self.run_command( [ 'get', '--obj-tags', 'obj4' ] )
+        self.assertEqual( out, '' )
+
+    def test_get_no_obj( self ):
+        out, err = self.run_command( [ 'get', '--obj-tags' ] )
+        self.assertEqual( out, '' )
+
 '''
 def test_cmd( cmd, no_err = True, grab_std = True ):
     if grab_std:
