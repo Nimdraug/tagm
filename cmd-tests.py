@@ -120,29 +120,36 @@ class TestAddSymlink( TagmCommandTestCase ):
 
 
 class TagmCommandGetTestCase( TagmCommandTestCase ):
-    pass
+    def setUp( self ):
+        super( TagmCommandGetTestCase, self ).setUp()
+         
+        self.db.add( [ 'a' ], [ 'obj1', 'obj2', 'obj3' ] )
+        self.db.add( [ 'b' ], [ 'obj2', 'obj3' ] )
+        self.db.add( [ 'c' ], [ 'obj3' ] )
+        self.db.add( [ [ 'c', 'd' ] ], [ 'obj1' ] )
 
 class TestGetObjsByTags( TagmCommandGetTestCase ):
-    pass
+    def test_get_single_tag( self ):
+        out, err = self.run_command( [ 'get', 'b' ] )
+        self.assertEqual( out, 'obj2\nobj3\n' )
+
+    def test_get_multiple_tags( self ):
+        out, err = self.run_command( [ 'get', 'b,c' ] )
+        self.assertEqual( out, 'obj3\n' )
+    
+    def test_get_subtag( self ):
+        out, err = self.run_command( [ 'get', 'c:d' ] )
+        self.assertEqual( out, 'obj1\n' )
+
+    def test_get_subtag_parent_include_subtags( self ):
+        out, err = self.run_command( [ 'get', '--subtags', 'c' ] )
+        self.assertEqual( out, 'obj3\nobj1\n' )
     
 class TestGetTagsByTags( TagmCommandGetTestCase ):
     pass
 
 class TestGetTagsByObjs( TagmCommandGetTestCase ):
     pass
-
-def test_get_objs_by_tags():
-    # Ensure db and tagged objects are setup
-    test_add_tags()
-    
-    out = test_cmd( [ 'get', 'a,b' ] )
-    assert out == 'obj2\nobj3\n'
-    out = test_cmd( [ 'get', 'a,e:f' ] )
-    assert out == 'obj1\n'
-    out = test_cmd( [ 'get', '--subtags', 'a,e' ] )
-    assert out == 'obj1\n'
-    out = test_cmd( [ 'get' ] )
-    assert out == 'obj1\nobj2\nobj3\n'
 
 def test_get_tags_by_tags():
     # Ensure db and tagged objects are setup
