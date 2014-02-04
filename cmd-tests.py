@@ -5,8 +5,8 @@ class TagmCommandTestCase( unittest.TestCase ):
     def setUp( self ):
         self.oldout, self.olderr = sys.stdout, sys.stderr
 
-        sys.stdout = StringIO.StringIO()
-        sys.stderr = StringIO.StringIO()
+        self.stdout = sys.stdout = StringIO.StringIO()
+        self.stderr = sys.stderr = StringIO.StringIO()
 
         os.mkdir( 'test-data' )
         os.chdir( 'test-data' )
@@ -28,7 +28,6 @@ class TagmCommandTestCase( unittest.TestCase ):
         
         return stdout, stderr
         
-    
     def tearDown( self ):
         sys.stdout = self.oldout
         sys.stderr = self.olderr
