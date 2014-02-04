@@ -69,6 +69,14 @@ class TestAdd( TagmCommandTestCase ):
     def test_add_subtag( self ):
         out, err = self.run_command( [ 'add', 'a:b', 'obj1' ] )
         self.assertEqual( out, 'Added obj1 with tags a:b\n' )
+        
+    def test_add_escaped_colon( self ):
+        out, err = self.run_command( [ 'add', 'a\\:', 'obj1' ] )
+        self.assertEqual( out, 'Added obj1 with tags a\\:\n' )
+
+        curs = self.db.db.execute( 'select * from tags' )
+        self.assertEqual( curs.fetchall()[0]['tag'], 'a:' )
+        
 
 class TestAddGlob( TagmCommandTestCase ):
     def setUp( self ):
