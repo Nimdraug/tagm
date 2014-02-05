@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import os.path, sys, sqlite3
+import os.path, sys, sqlite3, re
 
 # == Terms ==
 # tag           ie. Sweden
@@ -216,10 +216,11 @@ class TagmDB( object ):
         return objtags
 
 
-TAGPATH_SEP = ':'
+TAGPATH_SEP = r':'
+TAGPATH_SEP_RE = re.compile( r'^' + TAGPATH_SEP + r'|[^\\]' + TAGPATH_SEP )
 
 def parse_tagpaths( tagpaths ):
-    return [ [ tag.strip() for tag in tagpath.split( TAGPATH_SEP ) ] for tagpath in tagpaths ]
+    return [ [ tag.strip().replace( '\\:', ':' ) for tag in TAGPATH_SEP_RE.split( tagpath ) ] for tagpath in tagpaths ]
 
 def join_tagpaths( tagpaths ):
     return [ TAGPATH_SEP.join( tags ) for tags in tagpaths ]
