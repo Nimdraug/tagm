@@ -192,5 +192,17 @@ class TestGetTagsByObjs( TagmCommandGetTestCase ):
         out, err = self.run_command( [ 'get', '--obj-tags' ] )
         self.assertEqual( out, '' )
 
+class TestGetEscapedColon( TagmCommandTestCase ):
+    def setUp( self ):
+        super( TestGetEscapedColon, self ).setUp()
+        
+        os.mknod( 'obj1')
+        
+        self.db.add( [ [ 'a:' ] ], [ 'obj1' ] )
+        
+    def runTest( self ):
+        out, err = self.run_command( [ 'get', '--tags' ] )
+        self.assertEqual( out, 'a\\:' )
+    
 if __name__ == '__main__':
     unittest.main()
