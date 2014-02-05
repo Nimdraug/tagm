@@ -83,6 +83,11 @@ class TestGetTagsByObjs( TagmGetTestCase ):
     def test_get_no_obj( self ):
         # TODO: Concider raising Exception here as well
         self.assertItemsEqual( self.db.get_obj_tags( [] ), [] )
+
+class TestTagpathParse( TagmTestCase ):
+    def test_parse_tagpaths( self ):
+        tps = tagm.parse_tagpaths( [ 'a:b:c' ] )
+        self.assertEqual( tps, [ [ 'a', 'b', 'c' ] ] )
     
 if __name__ == '__main__':
     unittest.main()
