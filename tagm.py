@@ -216,14 +216,14 @@ class TagmDB( object ):
         return objtags
 
 
-TAGPATH_SEP = r':'
-TAGPATH_SEP_RE = re.compile( r'^' + TAGPATH_SEP + r'|[^\\]' + TAGPATH_SEP )
+TAGPATH_SEP = ':'
+TAGPATH_SEP_RE = re.compile( r'^%s|[^\\]%s' % ( TAGPATH_SEP, TAGPATH_SEP ) )
 
 def parse_tagpaths( tagpaths ):
     return [ [ tag.strip().replace( '\\:', ':' ) for tag in TAGPATH_SEP_RE.split( tagpath ) ] for tagpath in tagpaths ]
 
 def join_tagpaths( tagpaths ):
-    return [ TAGPATH_SEP.join( tags ) for tags in tagpaths ]
+    return [ TAGPATH_SEP.join( [ tag.replace( TAGPATH_SEP, '\\' + TAGPATH_SEP ) for tag in tags ] ) for tags in tagpaths ]
 
 def process_paths( dbpath, paths, recursive = False, follow = True ):
     import fnmatch

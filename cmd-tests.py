@@ -202,7 +202,7 @@ class TestGetEscapedColon( TagmCommandTestCase ):
         
     def runTest( self ):
         out, err = self.run_command( [ 'get', '--tags' ] )
-        self.assertEqual( out, 'a\\:' )
+        self.assertEqual( out, 'a\\:\n' )
     
 if __name__ == '__main__':
     unittest.main()
