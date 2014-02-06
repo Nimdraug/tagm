@@ -88,6 +88,10 @@ class TestTagpathParse( TagmTestCase ):
     def test_parse_tagpaths( self ):
         tps = tagm.parse_tagpaths( [ 'a:b:c' ] )
         self.assertEqual( tps, [ [ 'a', 'b', 'c' ] ] )
+        
+    def test_parse_escaped_sep( self ):
+        tps = tagm.parse_tagpaths( [ 'a\\:b:c' ] )
+        self.assertEqual( tps, [ [ 'a:b', 'c' ] ] )
     
 if __name__ == '__main__':
     unittest.main()
