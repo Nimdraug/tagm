@@ -217,7 +217,7 @@ class TagmDB( object ):
 
 
 TAGPATH_SEP = ':'
-TAGPATH_SEP_RE = re.compile( r'^%s|[^\\]%s' % ( TAGPATH_SEP, TAGPATH_SEP ) )
+TAGPATH_SEP_RE = re.compile( r'(?<!\\)%s' % TAGPATH_SEP )
 
 def parse_tagpaths( tagpaths ):
     return [ [ tag.strip().replace( '\\:', ':' ) for tag in TAGPATH_SEP_RE.split( tagpath ) ] for tagpath in tagpaths ]
