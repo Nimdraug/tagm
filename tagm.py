@@ -313,7 +313,7 @@ def setup_parser():
     
     return parser
 
-if __name__ == '__main__':
+def main():
     args = setup_parser().parse_args()
     
     if args.func.__name__ != 'do_init':
@@ -338,3 +338,6 @@ if __name__ == '__main__':
         db = dbpath = None
     
     args.func( db, dbpath, args )
+
+if __name__ == '__main__':
+    main()
