@@ -1,5 +1,4 @@
-tagm
-====# tagm
+# tagm
 
 ## Installation
 
@@ -21,6 +20,16 @@ Requires setuptools to be installed on your system.
         add           Will add the specified tags to the specified objects
         get           Will list all the objects that are taged with all of the
                       specified tags.
+
+### Terms
+
+|Term       |Description    |
+|-----------|---------------|
+|tag        |meta tag attached to an object|
+|object     |file on the filesystem|
+|tagpath    |the absolute path to a subtag going through each of its parent tags separated by colon.<br />colons can be escaped by a bachslash if they are supposed to be part of the tag|
+|tagpaths   |list of tagpaths separated by comma|
+|objects    |list of objects separated by comma or space|
 
 ### init
 
