@@ -1,5 +1,6 @@
 *.py[cod]
 *.geany
+*.sublime*
 
 # C extensions
 *.so
