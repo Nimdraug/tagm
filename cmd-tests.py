@@ -80,6 +80,11 @@ class TestAdd( TagmCommandTestCase ):
         out, err = self.run_command( [ 'add', 'a', fname ] )
         self.assertEqual( out, u'Added %s with tags a\n' % fname )
 
+    def test_add_unicode_tag( self ):
+        tag = u'\xe5\xe4\xf6'
+        out, err = self.run_command( [ 'add', tag, 'obj1' ] )
+        self.assertEqual( out, u'Added obj1 with tags %s\n' % tag )
+
 class TestAddGlob( TagmCommandTestCase ):
     def setUp( self ):
         super( TestAddGlob, self ).setUp()
