@@ -73,7 +73,12 @@ class TestAdd( TagmCommandTestCase ):
 
         curs = self.db.db.execute( 'select * from tags' )
         self.assertEqual( curs.fetchall()[0]['tag'], 'a:' )
-        
+
+    def test_add_unicode_obj( self ):
+        fname = u'\xe5\xe4\xf6'
+        os.mknod( fname.encode( sys.getfilesystemencoding() ) )
+        out, err = self.run_command( [ 'add', 'a', fname ] )
+        self.assertEqual( out, u'Added %s with tags a\n' % fname )
 
 class TestAddGlob( TagmCommandTestCase ):
     def setUp( self ):
@@ -97,7 +102,7 @@ class TestAddGlob( TagmCommandTestCase ):
             'Added dir1/dir2/obj2 with tags b\n'
             'Added dir1/dir2/dir3/obj3 with tags b\n'
         ) )
-        
+    
 class TestAddSymlink( TagmCommandTestCase ):
     def setUp( self ):
         super( TestAddSymlink, self ).setUp()
