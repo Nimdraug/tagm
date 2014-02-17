@@ -3,20 +3,18 @@ import os, shutil, tagm, sys, StringIO, unittest
 
 class TagmCommandTestCase( unittest.TestCase ):
     def setUp( self ):
-        self.oldout, self.olderr = sys.stdout, sys.stderr
-
-        self.stdout = sys.stdout = StringIO.StringIO()
-        self.stderr = sys.stderr = StringIO.StringIO()
-
         os.mkdir( 'test-data' )
         os.chdir( 'test-data' )
 
         self.db = tagm.TagmDB( '.tagm.db' )
 
-        self.addCleanup( self.cleanup_files )
-
     def run_command( self, cmd ):
         args = tagm.setup_parser().parse_args( cmd )
+
+        self.oldout, self.olderr = sys.stdout, sys.stderr
+
+        self.stdout = sys.stdout = StringIO.StringIO()
+        self.stderr = sys.stderr = StringIO.StringIO()
         
         args.func( self.db, '', args )
         
@@ -25,14 +23,13 @@ class TagmCommandTestCase( unittest.TestCase ):
         
         sys.stdout.truncate( 0 )
         sys.stderr.truncate( 0 )
+
+        sys.stdout = self.oldout
+        sys.stderr = self.olderr
         
         return stdout, stderr
         
     def tearDown( self ):
-        sys.stdout = self.oldout
-        sys.stderr = self.olderr
-
-    def cleanup_files( self ):
         os.chdir( '..' )
         shutil.rmtree( 'test-data' )
 
