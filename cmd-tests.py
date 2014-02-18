@@ -163,6 +163,14 @@ class TestGetObjsByTags( TagmCommandGetTestCase ):
     def test_get_subtag_parent_include_subtags( self ):
         out, err = self.run_command( [ 'get', '--subtags', 'c' ] )
         self.assertEqual( out, 'obj3\nobj1\n' )
+
+    def test_get_unicode_tag( self ):
+        tag = u'\xe5\xe4\xf6'
+        self.db.add( [[tag]], ['obj1'] )
+        out, err = self.run_command( [ 'get', tag ] )
+        self.assertEqual( out, 'obj1\n' )
+
+
     
 class TestGetTagsByTags( TagmCommandGetTestCase ):
     def test_get_single_tag( self ):
@@ -194,6 +202,12 @@ class TestGetTagsByObjs( TagmCommandGetTestCase ):
     def test_get_invalid_obj( self ):
         out, err = self.run_command( [ 'get', '--obj-tags', 'obj4' ] )
         self.assertEqual( out, '' )
+
+    def test_get_unicode_tag( self ):
+        tag = u'\xe5\xe4\xf6'
+        self.db.add( [[tag]], ['obj4'] )
+        out, err = self.run_command( [ 'get', '--obj-tags', 'obj4' ] )
+        self.assertEqual( out.decode( 'UTF-8' ), u'%s\n' % tag )
 
     def test_get_no_obj( self ):
         out, err = self.run_command( [ 'get', '--obj-tags' ] )
