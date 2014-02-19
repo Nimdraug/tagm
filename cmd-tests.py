@@ -107,6 +107,16 @@ class TestAddGlob( TagmCommandTestCase ):
             'Added dir1/dir2/obj2 with tags b\n'
             'Added dir1/dir2/dir3/obj3 with tags b\n'
         ) )
+
+    def test_add_with_unicode( self ):
+        fname = u'\xe5\xe4\xf6'
+        os.mknod( ( u'dir1/dir2/dir3/%s' % fname ).encode( sys.getfilesystemencoding() ) )
+        out, err = self.run_command( [ 'add', 'a', '-r', 'dir1/dir2/dir3/*' ] )
+        self.assertEqual( out.decode( 'UTF-8' ), ( 
+            u'Added dir1/dir2/dir3/obj3 with tags a\n'
+            u'Added dir1/dir2/dir3/%s with tags a\n' % fname
+        ) )
+
     
 class TestAddSymlink( TagmCommandTestCase ):
     def setUp( self ):
