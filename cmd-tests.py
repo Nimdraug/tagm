@@ -3,20 +3,18 @@ import os, shutil, tagm, sys, StringIO, unittest
 
 class TagmCommandTestCase( unittest.TestCase ):
     def setUp( self ):
-        self.oldout, self.olderr = sys.stdout, sys.stderr
-
-        self.stdout = sys.stdout = StringIO.StringIO()
-        self.stderr = sys.stderr = StringIO.StringIO()
-
         os.mkdir( 'test-data' )
         os.chdir( 'test-data' )
 
         self.db = tagm.TagmDB( '.tagm.db' )
 
-        self.addCleanup( self.cleanup_files )
-
     def run_command( self, cmd ):
         args = tagm.setup_parser().parse_args( cmd )
+
+        self.oldout, self.olderr = sys.stdout, sys.stderr
+
+        self.stdout = sys.stdout = StringIO.StringIO()
+        self.stderr = sys.stderr = StringIO.StringIO()
         
         args.func( self.db, '', args )
         
@@ -25,14 +23,13 @@ class TagmCommandTestCase( unittest.TestCase ):
         
         sys.stdout.truncate( 0 )
         sys.stderr.truncate( 0 )
+
+        sys.stdout = self.oldout
+        sys.stderr = self.olderr
         
         return stdout, stderr
         
     def tearDown( self ):
-        sys.stdout = self.oldout
-        sys.stderr = self.olderr
-
-    def cleanup_files( self ):
         os.chdir( '..' )
         shutil.rmtree( 'test-data' )
 
@@ -76,7 +73,17 @@ class TestAdd( TagmCommandTestCase ):
 
         curs = self.db.db.execute( 'select * from tags' )
         self.assertEqual( curs.fetchall()[0]['tag'], 'a:' )
-        
+
+    def test_add_unicode_obj( self ):
+        fname = u'\xe5\xe4\xf6'
+        os.mknod( fname.encode( sys.getfilesystemencoding() ) )
+        out, err = self.run_command( [ 'add', 'a', fname ] )
+        self.assertEqual( out, u'Added %s with tags a\n' % fname )
+
+    def test_add_unicode_tag( self ):
+        tag = u'\xe5\xe4\xf6'
+        out, err = self.run_command( [ 'add', tag, 'obj1' ] )
+        self.assertEqual( out, u'Added obj1 with tags %s\n' % tag )
 
 class TestAddGlob( TagmCommandTestCase ):
     def setUp( self ):
@@ -100,7 +107,17 @@ class TestAddGlob( TagmCommandTestCase ):
             'Added dir1/dir2/obj2 with tags b\n'
             'Added dir1/dir2/dir3/obj3 with tags b\n'
         ) )
-        
+
+    def test_add_with_unicode( self ):
+        fname = u'\xe5\xe4\xf6'
+        os.mknod( ( u'dir1/dir2/dir3/%s' % fname ).encode( sys.getfilesystemencoding() ) )
+        out, err = self.run_command( [ 'add', 'a', '-r', 'dir1/dir2/dir3/*' ] )
+        self.assertEqual( out.decode( 'UTF-8' ), ( 
+            u'Added dir1/dir2/dir3/obj3 with tags a\n'
+            u'Added dir1/dir2/dir3/%s with tags a\n' % fname
+        ) )
+
+    
 class TestAddSymlink( TagmCommandTestCase ):
     def setUp( self ):
         super( TestAddSymlink, self ).setUp()
@@ -156,6 +173,14 @@ class TestGetObjsByTags( TagmCommandGetTestCase ):
     def test_get_subtag_parent_include_subtags( self ):
         out, err = self.run_command( [ 'get', '--subtags', 'c' ] )
         self.assertEqual( out, 'obj3\nobj1\n' )
+
+    def test_get_unicode_tag( self ):
+        tag = u'\xe5\xe4\xf6'
+        self.db.add( [[tag]], ['obj1'] )
+        out, err = self.run_command( [ 'get', tag ] )
+        self.assertEqual( out, 'obj1\n' )
+
+
     
 class TestGetTagsByTags( TagmCommandGetTestCase ):
     def test_get_single_tag( self ):
@@ -187,6 +212,12 @@ class TestGetTagsByObjs( TagmCommandGetTestCase ):
     def test_get_invalid_obj( self ):
         out, err = self.run_command( [ 'get', '--obj-tags', 'obj4' ] )
         self.assertEqual( out, '' )
+
+    def test_get_unicode_tag( self ):
+        tag = u'\xe5\xe4\xf6'
+        self.db.add( [[tag]], ['obj4'] )
+        out, err = self.run_command( [ 'get', '--obj-tags', 'obj4' ] )
+        self.assertEqual( out.decode( 'UTF-8' ), u'%s\n' % tag )
 
     def test_get_no_obj( self ):
         out, err = self.run_command( [ 'get', '--obj-tags' ] )
