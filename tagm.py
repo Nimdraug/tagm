@@ -231,7 +231,7 @@ def process_paths( dbpath, paths, recursive = False, follow = True ):
     def list_recursive():
         for root, dirs, files in os.walk( '.' ):
             for name in files:
-                yield os.path.join( root, name )
+                yield os.path.relpath( os.path.join( root, name ) )
     
     # Ensure that paths exist and are relative to db path
     for path in paths:
