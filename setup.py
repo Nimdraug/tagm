@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name = 'tagm',
-    version = '0.1-dev',
+    version = '0.1',
     
     maintainer = u'Martin Hult\xe9n-Ashauer',
     maintainer_email = 'tagm@nimdraug.com',
