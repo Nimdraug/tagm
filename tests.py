@@ -100,7 +100,7 @@ class TestSet( TagmTestCase ):
     def test_set_tags( self ):
         self.db.add( [ 'a' ], [ 'obj1' ] )
         self.assertIsNone( self.db.set( [ 'b' ], find = [ 'a' ] ) )
-        self.assertEqual( self.db.get_obj_tags( [ 'obj1' ] ) )
+        self.assertEqual( self.db.get_obj_tags( [ 'obj1' ] ), [ [ 'b' ] ] )
     
 if __name__ == '__main__':
     unittest.main()
