@@ -99,7 +99,7 @@ class TestSet( TagmTestCase ):
 
     def test_set_tags( self ):
         self.db.add( [ 'a' ], [ 'obj1' ] )
-        self.assertIsNone( self.db.set( [ 'b' ], tags = [ 'a' ] ) )
+        self.assertIsNone( self.db.set( [ 'b' ], find = [ 'a' ] ) )
         self.assertEqual( self.db.get_obj_tags( [ 'obj1' ] ) )
     
 if __name__ == '__main__':
