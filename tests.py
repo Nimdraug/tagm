@@ -92,6 +92,15 @@ class TestTagpathParse( TagmTestCase ):
     def test_parse_escaped_sep( self ):
         tps = tagm.parse_tagpaths( [ 'a\\:b:c' ] )
         self.assertEqual( tps, [ [ 'a:b', 'c' ] ] )
+
+class TestSet( TagmTestCase ):
+    def test_set_objs( self ):
+        self.assertIsNone( self.db.set( [ 'a' ], [ 'obj1' ] ) )
+
+    def test_set_tags( self ):
+        self.db.add( [ 'a' ], [ 'obj1' ] )
+        self.assertIsNone( self.db.set( [ 'b' ], tags = [ 'a' ] ) )
+        self.assertEqual( self.db.get_obj_tags( [ 'obj1' ] ) )
     
 if __name__ == '__main__':
     unittest.main()
