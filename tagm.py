@@ -126,6 +126,31 @@ class TagmDB( object ):
         
         self.db.commit()
 
+    def set( self, tags, objs = None, find = None ):
+        tags = self._get_tag_ids( tags, True )
+
+        if not objs:
+            objs = self.get( find )
+        elif isinstance( objs, basestring ):
+            objs = [ objs ]
+
+        for obj in objs:
+            row = self.db.execute( 'select rowid from objs where path = ?', [obj] ).fetchone()
+            
+            if not row:
+                curs = self.db.execute( 'insert into objs ( path ) values ( ? )', ( obj, ) )
+                obj_id = curs.lastrowid
+            else:
+                obj_id = row['rowid']
+
+            # Remove any existing tags
+            self.db.execute( 'delete from objtags where obj_id = ?', ( obj_id, ) )
+
+            # Add the new tags
+            for i, tag_id in enumerate( tags ):
+                self.db.execute( 'insert into objtags ( tag_id, obj_id ) values ( ?, ? )', ( tag_id, obj_id ) )
+
+
     def get( self, tags, obj_tags = False, subtags = False ):
         '''
             Looks up the objects tagged by the leaftags (or the leaftags' subtags if subtags is True)
