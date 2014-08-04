@@ -234,6 +234,24 @@ class TestGetEscapedColon( TagmCommandTestCase ):
     def runTest( self ):
         out, err = self.run_command( [ 'get', '--tags' ] )
         self.assertEqual( out, 'a\\:\n' )
+
+class TestSet( TagmCommandTestCase ):
+    def setUp( self ):
+        super( TestSet, self ).setUp()
+
+        os.mknod( 'obj1' )
+
+    def test_set( self ):
+        out, err = self.run_command( [ 'set', 'a', 'obj1' ] )
+        self.assertEqual( out, 'Set tags to a on obj1\n' )
+
+    def test_set_tags( self ):
+        self.db.add( [ [ 'a' ] ], [ 'obj1' ] )
+        out, err = self.run_command( [ 'set', 'b', '--tags', 'a' ] )
+
+        self.assertEqual( out, 'Set tags to b on obj1\n' )
+
+        self.assertEqual( self.db.get( [ [ 'a' ] ] ), [] )
     
 if __name__ == '__main__':
     unittest.main()
