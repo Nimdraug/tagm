@@ -306,6 +306,23 @@ def setup_parser():
     add_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be tagged' )
     add_parser.set_defaults( func = do_add )
 
+    # Set command: directly sets the tags of objects
+    def do_set( db, dbpath, ns ):
+        tags = parse_tagpaths( ns.tags != '' and ns.tags.split(',') or [] )
+
+        for f in process_paths( dbpath, ns.objs, ns.recursive, ns.follow ):
+            db.set( tags, f )
+            print 'Set tags to', ns.tags, 'on', f
+
+    set_help = 'Will set the specified objects\' tags to the specified tags'
+    set_parser = subparsers.add_parser( 'set', help = set_help, description = set_help )
+    set_parser.add_argument( 'tags', help = 'List of tagpaths separated by comma' )
+    set_parser.add_argument( '-r', '--recursive', action = 'store_true', help = 'the list of objects is actually a list of recursive glob paths' )
+    set_parser.add_argument( '-f', '--no-follow', dest = 'follow', action = 'store_false',
+                        help = 'do not follow any symlinks')
+    set_parser.add_argument( 'objs', nargs = '+', help = 'List of objects to be tagged' )
+    set_parser.set_defaults( func = do_set )
+
     # Get command: gets objects tagged with tags
     def do_get( db, dbpath, ns ):
         if not isinstance( ns.tags, list ):
