@@ -149,7 +149,8 @@ class TagmDB( object ):
             # Add the new tags
             for i, tag_id in enumerate( tags ):
                 self.db.execute( 'insert into objtags ( tag_id, obj_id ) values ( ?, ? )', ( tag_id, obj_id ) )
-
+        
+        self.db.commit()
 
     def get( self, tags, obj_tags = False, subtags = False ):
         '''
